@@ -14,7 +14,7 @@ interface Project {
   summary: string | null;
   cover_url: string | null;
   stack: string[];
-  profiles: {
+  public_profiles: {
     handle: string;
   };
 }
@@ -41,7 +41,7 @@ const Explore = () => {
         summary,
         cover_url,
         stack,
-        profiles!inner(handle, hireable)
+        public_profiles!inner(handle, hireable)
       `)
       .eq("published", true)
       .order("created_at", { ascending: false });
@@ -64,7 +64,7 @@ const Explore = () => {
     const matchesSkill = !skillFilter ||
       project.stack.some(tech => tech.toLowerCase().includes(skillFilter.toLowerCase()));
     
-    const matchesHireable = !hireableOnly || (project.profiles as any).hireable;
+    const matchesHireable = !hireableOnly || (project.public_profiles as any).hireable;
 
     return matchesSearch && matchesSkill && matchesHireable;
   });
@@ -145,7 +145,7 @@ const Explore = () => {
                   summary={project.summary}
                   coverUrl={project.cover_url}
                   stack={project.stack}
-                  ownerHandle={(project.profiles as any).handle}
+                  ownerHandle={(project.public_profiles as any).handle}
                 />
               ))}
             </div>

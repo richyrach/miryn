@@ -23,7 +23,7 @@ const Profile = () => {
     setLoading(true);
     
     const { data: profileData } = await supabase
-      .from("profiles")
+      .from("public_profiles")
       .select("*")
       .eq("handle", handle)
       .single();

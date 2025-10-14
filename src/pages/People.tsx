@@ -29,7 +29,7 @@ const People = () => {
   const fetchProfiles = async () => {
     setLoading(true);
     const { data, error } = await supabase
-      .from("profiles")
+      .from("public_profiles")
       .select("*")
       .order("created_at", { ascending: false });
 
