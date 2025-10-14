@@ -116,11 +116,65 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "projects_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          display_name: string | null
+          handle: string | null
+          hireable: boolean | null
+          id: string | null
+          intro_url: string | null
+          location: string | null
+          primary_cta: string | null
+          primary_cta_url: string | null
+          skills: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          handle?: string | null
+          hireable?: boolean | null
+          id?: string | null
+          intro_url?: string | null
+          location?: string | null
+          primary_cta?: string | null
+          primary_cta_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          handle?: string | null
+          hireable?: boolean | null
+          id?: string | null
+          intro_url?: string | null
+          location?: string | null
+          primary_cta?: string | null
+          primary_cta_url?: string | null
+          skills?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
