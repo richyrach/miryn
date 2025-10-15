@@ -72,10 +72,13 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
 
       if (convError || !newConv) throw convError || new Error("Failed to create conversation");
 
+      // Add both participants in a single transaction
+      // First add yourself (the creator), then add the target user
       const { error: participantError } = await supabase
         .from("conversation_participants")
         .insert([
-          { conversation_id: newConv.id, user_id: targetUserId }
+          { conversation_id: newConv.id, user_id: currentUserId },  // Add creator
+          { conversation_id: newConv.id, user_id: targetUserId }    // Add target user
         ]);
 
       if (participantError) throw participantError;
