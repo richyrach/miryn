@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle } from "lucide-react";
+import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -81,6 +81,9 @@ export const Navbar = () => {
             </Link>
             <Link to="/people" className="text-foreground hover:text-primary transition-colors">
               People
+            </Link>
+            <Link to="/services" className="text-foreground hover:text-primary transition-colors">
+              Services
             </Link>
 
             {user && (

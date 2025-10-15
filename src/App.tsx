@@ -16,6 +16,9 @@ import Profile from "./pages/Profile";
 import Project from "./pages/Project";
 import Admin from "./pages/Admin";
 import Messages from "./pages/Messages";
+import Services from "./pages/Services";
+import ServiceDetail from "./pages/ServiceDetail";
+import NewService from "./pages/NewService";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -39,6 +42,9 @@ const App = () => (
           <Route path="/new" element={<NewProject />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/messages" element={<Messages />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/new" element={<NewService />} />
+          <Route path="/services/:serviceId" element={<ServiceDetail />} />
           <Route path="/:handle" element={<Profile />} />
           <Route path="/:handle/:projectSlug" element={<Project />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
