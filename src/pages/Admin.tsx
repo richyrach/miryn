@@ -730,6 +730,100 @@ const Admin = () => {
                 )}
               </div>
             </TabsContent>
+
+            {/* Reports Tab */}
+            <TabsContent value="reports">
+              <div className="glass-card rounded-2xl p-6">
+                <h2 className="text-2xl font-bold mb-4">User Reports</h2>
+                {reports.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No reports submitted</p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Target Type</TableHead>
+                          <TableHead>Target ID</TableHead>
+                          <TableHead>Reason</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Reported</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {reports.map((report) => (
+                          <TableRow key={report.id}>
+                            <TableCell>
+                              <Badge variant="secondary">{report.target_type}</Badge>
+                            </TableCell>
+                            <TableCell className="font-mono text-xs truncate max-w-[100px]">
+                              {report.target_id.substring(0, 8)}...
+                            </TableCell>
+                            <TableCell className="max-w-xs">
+                              <div className="truncate" title={report.reason}>
+                                {report.reason}
+                              </div>
+                              {report.details && (
+                                <p className="text-xs text-muted-foreground truncate mt-1" title={report.details}>
+                                  {report.details}
+                                </p>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Select
+                                value={report.status}
+                                onValueChange={(status) => updateReportStatus(report.id, status as "open" | "reviewing" | "resolved" | "dismissed")}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="open">Open</SelectItem>
+                                  <SelectItem value="reviewing">Reviewing</SelectItem>
+                                  <SelectItem value="resolved">Resolved</SelectItem>
+                                  <SelectItem value="dismissed">Dismissed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell>
+                              {formatDistanceToNow(new Date(report.created_at), { addSuffix: true })}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                {report.target_type === 'project' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      adminUnpublishProject(report.target_id);
+                                      updateReportStatus(report.id, "resolved");
+                                    }}
+                                  >
+                                    Unpublish
+                                  </Button>
+                                )}
+                                {report.target_type === 'service' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      adminDeactivateService(report.target_id);
+                                      updateReportStatus(report.id, "resolved");
+                                    }}
+                                  >
+                                    Deactivate
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
           </Tabs>
         </div>
       </main>
