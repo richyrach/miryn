@@ -195,7 +195,7 @@ const Admin = () => {
     setReports(data || []);
   };
 
-  const updateReportStatus = async (id: string, status: string) => {
+  const updateReportStatus = async (id: string, status: "open" | "reviewing" | "resolved" | "dismissed") => {
     const { error } = await supabase
       .from("reports")
       .update({ status })
