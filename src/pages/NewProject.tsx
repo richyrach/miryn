@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
+import { getDatabaseErrorMessage } from "@/lib/errorMessages";
 
 const projectSchema = z.object({
   title: z.string().trim().min(1, "Title is required").max(100, "Title must be less than 100 characters"),
@@ -103,7 +104,11 @@ const NewProject = () => {
       });
 
     if (error) {
-      toast({ title: "Error creating project", description: "Unable to create project. Please try again.", variant: "destructive" });
+      toast({ 
+        title: "Error creating project", 
+        description: getDatabaseErrorMessage(error), 
+        variant: "destructive" 
+      });
     } else {
       toast({ title: "Project created successfully!" });
       navigate("/explore");

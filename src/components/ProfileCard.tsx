@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Badge } from "./ui/badge";
+import { RoleBadge } from "./RoleBadge";
 import { User } from "lucide-react";
 
 interface ProfileCardProps {
@@ -8,6 +9,7 @@ interface ProfileCardProps {
   skills: string[];
   hireable: boolean;
   avatarUrl?: string | null;
+  role?: string;
 }
 
 export const ProfileCard = ({
@@ -16,6 +18,7 @@ export const ProfileCard = ({
   skills,
   hireable,
   avatarUrl,
+  role = 'user',
 }: ProfileCardProps) => {
   return (
     <Link to={`/${handle}`} className="block group">
@@ -29,9 +32,12 @@ export const ProfileCard = ({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-lg font-bold truncate group-hover:text-primary transition-colors">
-              {displayName}
-            </h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-lg font-bold truncate group-hover:text-primary transition-colors">
+                {displayName}
+              </h3>
+              <RoleBadge role={role} />
+            </div>
             <p className="text-sm text-muted-foreground">@{handle}</p>
           </div>
         </div>

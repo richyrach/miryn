@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCard } from "@/components/ProjectCard";
+import { RoleBadge } from "@/components/RoleBadge";
 import { User, MapPin, ExternalLink } from "lucide-react";
 
 const Profile = () => {
@@ -84,23 +85,32 @@ const Profile = () => {
       <main className="pt-32 pb-20 px-4">
         <div className="max-w-6xl mx-auto">
           {/* Profile Header */}
-          <div className="glass-card rounded-2xl p-8 mb-12">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-primary/20 flex-shrink-0">
-                {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-12 h-12 text-muted-foreground" />
-                )}
+          <div className="glass-card rounded-2xl overflow-hidden mb-12">
+            {/* Banner */}
+            {profile.banner_url && (
+              <div className="w-full h-48 md:h-64 overflow-hidden">
+                <img src={profile.banner_url} alt="Profile banner" className="w-full h-full object-cover" />
               </div>
-
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-3 mb-3">
-                  <h1 className="text-3xl md:text-4xl font-bold">{profile.display_name}</h1>
-                  {profile.hireable && (
-                    <Badge className="badge-hireable">Available for hire</Badge>
+            )}
+            
+            <div className="p-8">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className={`w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-background flex-shrink-0 ${profile.banner_url ? '-mt-16' : ''}`}>
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-12 h-12 text-muted-foreground" />
                   )}
                 </div>
+
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-3 mb-3">
+                    <h1 className="text-3xl md:text-4xl font-bold">{profile.display_name}</h1>
+                    <RoleBadge role={profile.role} />
+                    {profile.hireable && (
+                      <Badge className="badge-hireable">Available for hire</Badge>
+                    )}
+                  </div>
                 
                 <p className="text-lg text-muted-foreground mb-4">@{profile.handle}</p>
                 
@@ -131,19 +141,20 @@ const Profile = () => {
                     </a>
                   </Button>
                 )}
+                </div>
               </div>
-            </div>
 
-            {profile.intro_url && (
-              <div className="mt-8 aspect-video bg-muted rounded-xl overflow-hidden">
-                <iframe
-                  src={profile.intro_url.replace("watch?v=", "embed/")}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            )}
+              {profile.intro_url && (
+                <div className="mt-8 aspect-video bg-muted rounded-xl overflow-hidden">
+                  <iframe
+                    src={profile.intro_url.replace("watch?v=", "embed/")}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Projects */}

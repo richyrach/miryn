@@ -10,7 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
-import { Check } from "lucide-react";
+import { Check, Upload, User, Image as ImageIcon } from "lucide-react";
+import { getDatabaseErrorMessage } from "@/lib/errorMessages";
 
 const profileSchema = z.object({
   display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
@@ -28,6 +29,10 @@ const Settings = () => {
   const [saved, setSaved] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -49,7 +54,47 @@ const Settings = () => {
     
     if (data) {
       setProfile(data);
+      if (data.avatar_url) setAvatarPreview(data.avatar_url);
+      if (data.banner_url) setBannerPreview(data.banner_url);
     }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setBannerFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBannerPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const uploadFile = async (file: File, bucket: string, path: string) => {
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(path, file, { upsert: true });
+    
+    if (error) throw error;
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(path);
+    
+    return publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -91,27 +136,51 @@ const Settings = () => {
       setLoading(false);
       return;
     }
-    
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        display_name: validationResult.data.display_name,
-        bio: validationResult.data.bio || null,
-        location: validationResult.data.location || null,
-        skills: validationResult.data.skills,
-        intro_url: validationResult.data.intro_url || null,
-        primary_cta: primaryCta || null,
-        primary_cta_url: validationResult.data.primary_cta_url || null,
-        hireable,
-      })
-      .eq("user_id", userId);
 
-    if (error) {
-      toast({ title: "Error updating profile", description: "Unable to update profile. Please try again.", variant: "destructive" });
-    } else {
+    try {
+      let avatarUrl = profile.avatar_url;
+      let bannerUrl = profile.banner_url;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const avatarPath = `${userId}/avatar-${Date.now()}.${avatarFile.name.split('.').pop()}`;
+        avatarUrl = await uploadFile(avatarFile, 'avatars', avatarPath);
+      }
+
+      // Upload banner if changed
+      if (bannerFile) {
+        const bannerPath = `${userId}/banner-${Date.now()}.${bannerFile.name.split('.').pop()}`;
+        bannerUrl = await uploadFile(bannerFile, 'banners', bannerPath);
+      }
+    
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          display_name: validationResult.data.display_name,
+          bio: validationResult.data.bio || null,
+          location: validationResult.data.location || null,
+          skills: validationResult.data.skills,
+          intro_url: validationResult.data.intro_url || null,
+          primary_cta: primaryCta || null,
+          primary_cta_url: validationResult.data.primary_cta_url || null,
+          hireable,
+          avatar_url: avatarUrl,
+          banner_url: bannerUrl,
+        })
+        .eq("user_id", userId);
+
+      if (error) throw error;
+
       setSaved(true);
       toast({ title: "Profile updated successfully!" });
       setTimeout(() => setSaved(false), 3000);
+      fetchProfile(userId);
+    } catch (error: any) {
+      toast({ 
+        title: "Error updating profile", 
+        description: getDatabaseErrorMessage(error), 
+        variant: "destructive" 
+      });
     }
 
     setLoading(false);
@@ -141,6 +210,66 @@ const Settings = () => {
 
           <div className="glass-card rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Banner Upload */}
+              <div>
+                <Label>Profile Banner</Label>
+                <div className="mt-2 relative h-48 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group">
+                  {bannerPreview ? (
+                    <img src={bannerPreview} alt="Banner preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground">
+                      <ImageIcon className="w-12 h-12 mb-2" />
+                      <p className="text-sm">Click to upload banner</p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBannerChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <Upload className="w-8 h-8 text-white" />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Recommended: 1500x500px, max 10MB
+                </p>
+              </div>
+
+              {/* Avatar Upload */}
+              <div>
+                <Label>Profile Picture</Label>
+                <div className="mt-2 flex items-center gap-4">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                        <User className="w-8 h-8" />
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Upload className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-muted-foreground">
+                      Click to upload a new profile picture
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Recommended: 400x400px, max 5MB
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="handle">Handle</Label>
                 <Input

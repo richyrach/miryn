@@ -14,6 +14,7 @@ interface Profile {
   skills: string[];
   hireable: boolean;
   avatar_url: string | null;
+  role: string;
 }
 
 const People = () => {
@@ -116,6 +117,7 @@ const People = () => {
                   skills={profile.skills}
                   hireable={profile.hireable}
                   avatarUrl={profile.avatar_url}
+                  role={profile.role}
                 />
               ))}
             </div>

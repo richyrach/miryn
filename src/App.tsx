@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
 import Explore from "./pages/Explore";
 import People from "./pages/People";
 import Onboarding from "./pages/Onboarding";
@@ -12,6 +14,7 @@ import Settings from "./pages/Settings";
 import NewProject from "./pages/NewProject";
 import Profile from "./pages/Profile";
 import Project from "./pages/Project";
+import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,11 +28,15 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/people" element={<People />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/new" element={<NewProject />} />
+          <Route path="/admin" element={<Admin />} />
           <Route path="/:handle" element={<Profile />} />
           <Route path="/:handle/:projectSlug" element={<Project />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

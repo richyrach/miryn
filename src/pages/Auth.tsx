@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
+import { getAuthErrorMessage } from "@/lib/errorMessages";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -37,19 +38,30 @@ const Auth = () => {
       return;
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/`,
+        emailRedirectTo: `${window.location.origin}/onboarding`,
         data: { username },
       },
     });
 
     if (error) {
-      toast({ title: "Error signing up", description: error.message, variant: "destructive" });
+      toast({ 
+        title: "Error signing up", 
+        description: getAuthErrorMessage(error), 
+        variant: "destructive" 
+      });
+    } else if (data.user && !data.user.confirmed_at) {
+      toast({ 
+        title: "Check your email!",
+        description: "We sent you a verification link. Please check your inbox.",
+        duration: 10000
+      });
+      setTimeout(() => navigate("/verify-email"), 1500);
     } else {
-      toast({ title: "Success! Redirecting to onboarding..." });
+      toast({ title: "Success! Redirecting..." });
       setTimeout(() => navigate("/onboarding"), 1000);
     }
 
@@ -67,7 +79,11 @@ const Auth = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      toast({ title: "Error signing in", description: error.message, variant: "destructive" });
+      toast({ 
+        title: "Error signing in", 
+        description: getAuthErrorMessage(error), 
+        variant: "destructive" 
+      });
     } else {
       toast({ title: "Welcome back!" });
       navigate("/settings");
@@ -108,7 +124,12 @@ const Auth = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="signin-password">Password</Label>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label htmlFor="signin-password">Password</Label>
+                      <Link to="/reset-password" className="text-xs text-primary hover:underline">
+                        Forgot password?
+                      </Link>
+                    </div>
                     <Input
                       id="signin-password"
                       name="signin-password"
@@ -155,8 +176,13 @@ const Auth = () => {
                       type="password"
                       required
                       className="mt-1"
-                      minLength={6}
+                      minLength={12}
+                      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$"
+                      title="Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      12+ characters, with uppercase, lowercase, number, and special character
+                    </p>
                   </div>
                   <Button type="submit" className="w-full btn-hero" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
