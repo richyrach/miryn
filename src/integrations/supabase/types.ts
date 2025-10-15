@@ -600,6 +600,10 @@ export type Database = {
         Args: { follower: string; following: string }
         Returns: boolean
       }
+      user_in_conversation: {
+        Args: { _conversation_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "owner" | "admin" | "moderator" | "user"

@@ -121,7 +121,7 @@ const NewProject = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="pt-32 pb-20 px-4">
+      <main className="pt-32 pb-20 px-4 animate-fade-in">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-bold mb-2">Create New Project</h1>
@@ -131,73 +131,88 @@ const NewProject = () => {
           <div className="glass-card rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="title">Project Title *</Label>
+                <Label htmlFor="title">Project Name *</Label>
                 <Input
                   id="title"
                   name="title"
-                  placeholder="My Awesome Project"
+                  placeholder="My Awesome App"
                   required
                   className="mt-1"
                 />
-              </div>
-
-              <div>
-                <Label htmlFor="slug">URL Slug (optional)</Label>
-                <Input
-                  id="slug"
-                  name="slug"
-                  placeholder="my-awesome-project"
-                  pattern="[a-z0-9-]{1,50}"
-                  className="mt-1"
-                />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Leave blank to auto-generate from title
+                  Give your project a catchy name
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="summary">Summary</Label>
-                <Textarea
-                  id="summary"
-                  name="summary"
-                  placeholder="Brief description of your project..."
-                  className="mt-1 min-h-24"
+                <Label htmlFor="slug">Project URL (optional)</Label>
+                <Input
+                  id="slug"
+                  name="slug"
+                  placeholder="my-awesome-app"
+                  pattern="[a-z0-9-]{1,50}"
+                  className="mt-1"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Short URL-friendly version (leave blank to auto-generate). Will appear as: /@you/your-project-url
+                </p>
               </div>
 
               <div>
-                <Label htmlFor="stack">Tech Stack (comma-separated)</Label>
+                <Label htmlFor="summary">Description</Label>
+                <Textarea
+                  id="summary"
+                  name="summary"
+                  placeholder="Tell people what makes your project special..."
+                  className="mt-1 min-h-24"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  A short overview of your project (optional but recommended)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="stack">Technologies Used</Label>
                 <Input
                   id="stack"
                   name="stack"
-                  placeholder="React, Node.js, PostgreSQL..."
+                  placeholder="React, TypeScript, Tailwind CSS"
                   className="mt-1"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  List the tech stack, separated by commas
+                </p>
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold mb-4">Call to Action</h3>
+                <h3 className="text-lg font-semibold mb-4">Action Button</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="ctaLabel">CTA Label</Label>
+                    <Label htmlFor="ctaLabel">Button Text</Label>
                     <Input
                       id="ctaLabel"
                       name="ctaLabel"
-                      placeholder="e.g., View Live Demo"
+                      placeholder="Try Live Demo"
                       className="mt-1"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      What should your button say? (e.g., "Visit Site", "View Demo")
+                    </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="ctaUrl">CTA URL</Label>
+                    <Label htmlFor="ctaUrl">Button Link</Label>
                     <Input
                       id="ctaUrl"
                       name="ctaUrl"
                       type="url"
-                      placeholder="https://..."
+                      placeholder="https://myproject.com"
                       className="mt-1"
                     />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Where should the button take people?
+                    </p>
                   </div>
                 </div>
               </div>

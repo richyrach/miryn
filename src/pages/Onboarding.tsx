@@ -11,7 +11,7 @@ import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
 
 const onboardingSchema = z.object({
-  handle: z.string().trim().min(3, "Handle must be at least 3 characters").max(20, "Handle must be less than 20 characters").regex(/^[a-z0-9-]+$/, "Handle can only contain lowercase letters, numbers, and hyphens"),
+  handle: z.string().trim().min(3, "Username must be at least 3 characters").max(20, "Username must be at most 20 characters").regex(/^[a-z0-9]+$/, "Username can only contain lowercase letters and numbers"),
   display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
   intro_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   primary_cta_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
@@ -92,7 +92,7 @@ const Onboarding = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="pt-32 pb-20 px-4">
+      <main className="pt-32 pb-20 px-4 animate-fade-in">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Welcome to Miryn!</h1>
@@ -102,18 +102,22 @@ const Onboarding = () => {
           <div className="glass-card rounded-2xl p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="handle">Handle (username) *</Label>
+                <Label htmlFor="handle">Username *</Label>
                 <Input
                   id="handle"
                   name="handle"
-                  placeholder="your-handle"
+                  placeholder="username123"
                   required
-                  pattern="[a-z0-9-]{3,20}"
-                  title="3-20 characters, lowercase letters, numbers, and hyphens only"
+                  pattern="[a-z0-9]{3,20}"
+                  title="3-20 characters, lowercase letters and numbers only"
                   className="mt-1"
+                  maxLength={20}
+                  onChange={(e) => {
+                    e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  }}
                 />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Your profile will be at miryn.app/{"{handle}"}
+                  Your profile will be at miryn.app/@{"{username}"}. Only lowercase letters and numbers.
                 </p>
               </div>
 
@@ -140,29 +144,35 @@ const Onboarding = () => {
               </div>
 
               <div>
-                <Label htmlFor="primaryCta">Primary CTA Type</Label>
+                <Label htmlFor="primaryCta">Main Action Button</Label>
                 <Select name="primaryCta">
                   <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Select action" />
+                    <SelectValue placeholder="What should your profile button do?" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="hire">Hire me</SelectItem>
                     <SelectItem value="invite_bot">Invite to collaborate</SelectItem>
                     <SelectItem value="contact">Contact</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
+                    <SelectItem value="custom">Custom action</SelectItem>
                   </SelectContent>
                 </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  This button will appear on your profile
+                </p>
               </div>
 
               <div>
-                <Label htmlFor="primaryCtaUrl">CTA URL</Label>
+                <Label htmlFor="primaryCtaUrl">Button Link</Label>
                 <Input
                   id="primaryCtaUrl"
                   name="primaryCtaUrl"
                   type="url"
-                  placeholder="https://..."
+                  placeholder="https://calendly.com/yourname or https://yoursite.com/contact"
                   className="mt-1"
                 />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Where should the button take people? (e.g., your booking page, contact form)
+                </p>
               </div>
 
               <div className="flex items-center space-x-2">
