@@ -22,6 +22,7 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
     if (handle) {
@@ -49,6 +50,29 @@ const Profile = () => {
         .order("created_at", { ascending: false });
 
       setProjects(projectsData || []);
+
+      // Fetch services
+      const { data: servicesData } = await supabase
+        .from("services")
+        .select("*")
+        .eq("profile_id", profileData.id)
+        .eq("active", true)
+        .order("created_at", { ascending: false });
+
+      setServices(servicesData || []);
+
+      // Fetch user's roles
+      const { data: rolesData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", profileData.user_id);
+      
+      // Determine highest role (owner > admin > moderator > content_mod > junior_mod > support)
+      if (rolesData && rolesData.length > 0) {
+        const roleHierarchy = ['owner', 'admin', 'moderator', 'content_mod', 'junior_mod', 'support'];
+        const highestRole = roleHierarchy.find(r => rolesData.some(rd => rd.role === r));
+        setUserRole(highestRole || null);
+      }
 
       // Get user_id for follow counts
       const { data: profileWithUserId } = await supabase
@@ -139,7 +163,7 @@ const Profile = () => {
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
                     <h1 className="text-3xl md:text-4xl font-bold">{profile.display_name}</h1>
-                    <RoleBadge role={profile.role} />
+                    <RoleBadge role={userRole} />
                     {profile.hireable && (
                       <Badge className="badge-hireable">Available for hire</Badge>
                     )}

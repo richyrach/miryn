@@ -48,11 +48,12 @@ interface Service {
   profile_id: string;
   contact_methods?: any[];
   accepted_payment_methods?: any[];
-  public_profiles: {
+  profiles: {
     handle: string;
     display_name: string;
     avatar_url: string | null;
     bio: string | null;
+    user_id: string;
   };
 }
 
@@ -84,11 +85,11 @@ const ServiceDetail = () => {
       .from("services")
       .select(`
         *,
-        public_profiles!inner(handle, display_name, avatar_url, bio, user_id)
+        profiles!inner(handle, display_name, avatar_url, bio, user_id)
       `)
       .eq("id", serviceId)
       .eq("active", true)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching service:", error);
@@ -105,7 +106,7 @@ const ServiceDetail = () => {
 
       // Check if current user is the owner
       const { data: { session } } = await supabase.auth.getSession();
-      if (session && (data as any).public_profiles.user_id === session.user.id) {
+      if (session && (data as any).profiles.user_id === session.user.id) {
         setIsOwner(true);
       }
     }
@@ -295,14 +296,14 @@ const ServiceDetail = () => {
                 
                 {/* Seller Info */}
                 <Link
-                  to={`/${service.public_profiles.handle}`}
+                  to={`/${service.profiles.handle}`}
                   className="flex items-center gap-3 hover:opacity-80 transition-opacity w-fit"
                 >
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
-                    {service.public_profiles.avatar_url ? (
+                    {service.profiles.avatar_url ? (
                       <img
-                        src={service.public_profiles.avatar_url}
-                        alt={service.public_profiles.display_name}
+                        src={service.profiles.avatar_url}
+                        alt={service.profiles.display_name}
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -310,8 +311,8 @@ const ServiceDetail = () => {
                     )}
                   </div>
                   <div>
-                    <p className="font-semibold">{service.public_profiles.display_name}</p>
-                    <p className="text-sm text-muted-foreground">@{service.public_profiles.handle}</p>
+                    <p className="font-semibold">{service.profiles.display_name}</p>
+                    <p className="text-sm text-muted-foreground">@{service.profiles.handle}</p>
                   </div>
                 </Link>
               </div>
