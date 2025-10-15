@@ -41,69 +41,60 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
       return;
     }
 
-    // Check if conversation already exists
-    const { data: existingParticipants } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", currentUserId);
+    try {
+      const { data: myConvs } = await supabase
+        .from("conversation_participants")
+        .select("conversation_id")
+        .eq("user_id", currentUserId);
 
-    if (existingParticipants) {
-      for (const p of existingParticipants) {
-        const { data: otherParticipant } = await supabase
-          .from("conversation_participants")
-          .select("user_id")
-          .eq("conversation_id", p.conversation_id)
-          .eq("user_id", targetUserId)
-          .maybeSingle();
+      if (myConvs) {
+        for (const conv of myConvs) {
+          const { data: otherPart } = await supabase
+            .from("conversation_participants")
+            .select("user_id")
+            .eq("conversation_id", conv.conversation_id)
+            .neq("user_id", currentUserId)
+            .maybeSingle();
 
-        if (otherParticipant) {
-          // Conversation exists, navigate to messages
-          navigate("/messages");
-          setLoading(false);
-          return;
+          if (otherPart && otherPart.user_id === targetUserId) {
+            navigate("/messages");
+            setLoading(false);
+            return;
+          }
         }
       }
-    }
 
-    // Create new conversation
-    const { data: newConv, error: convError } = await supabase
-      .from("conversations")
-      .insert({})
-      .select()
-      .single();
+      const { data: newConv, error: convError } = await supabase
+        .from("conversations")
+        .insert({})
+        .select()
+        .single();
 
-    if (convError || !newConv) {
+      if (convError || !newConv) throw convError || new Error("Failed to create conversation");
+
+      const { error: participantError } = await supabase
+        .from("conversation_participants")
+        .insert([
+          { conversation_id: newConv.id, user_id: targetUserId }
+        ]);
+
+      if (participantError) throw participantError;
+
       toast({
-        title: "Error",
-        description: "Failed to create conversation",
-        variant: "destructive"
+        title: "Conversation started",
+        description: `You can now message @${targetHandle}`
       });
-      setLoading(false);
-      return;
-    }
-
-    // Add the other participant (current user is auto-added by trigger)
-    const { error: participantsError } = await supabase
-      .from("conversation_participants")
-      .insert([
-        { conversation_id: newConv.id, user_id: targetUserId }
-      ]);
-
-    if (participantsError) {
-      toast({
-        title: "Error",
-        description: "Failed to add participants",
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: `Started conversation with @${targetHandle}`
-      });
+      
       navigate("/messages");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to start conversation",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (

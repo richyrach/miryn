@@ -4,7 +4,8 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { User, Send } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { User, Send, Search } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 
@@ -14,6 +15,7 @@ interface Conversation {
   updated_at: string;
   other_user: {
     id: string;
+    user_id: string;
     display_name: string;
     handle: string;
     avatar_url: string | null;
@@ -34,11 +36,14 @@ interface Message {
 
 const Messages = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"recent" | "name">("recent");
 
   useEffect(() => {
     checkAuth();
@@ -53,9 +58,14 @@ const Messages = () => {
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages(selectedConversation);
-      subscribeToMessages(selectedConversation);
+      const cleanup = subscribeToMessages(selectedConversation);
+      return cleanup;
     }
   }, [selectedConversation]);
+
+  useEffect(() => {
+    filterAndSortConversations();
+  }, [conversations, searchTerm, sortBy]);
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -65,73 +75,93 @@ const Messages = () => {
     setLoading(false);
   };
 
+  const filterAndSortConversations = () => {
+    let filtered = [...conversations];
+
+    if (searchTerm) {
+      filtered = filtered.filter(conv =>
+        conv.other_user?.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        conv.other_user?.handle.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    if (sortBy === "recent") {
+      filtered.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+    } else {
+      filtered.sort((a, b) => 
+        (a.other_user?.display_name || "").localeCompare(b.other_user?.display_name || "")
+      );
+    }
+
+    setFilteredConversations(filtered);
+  };
+
   const fetchConversations = async () => {
     if (!currentUserId) return;
 
-    // Get all conversations where user is a participant
-    const { data: participants } = await supabase
-      .from("conversation_participants")
-      .select("conversation_id")
-      .eq("user_id", currentUserId);
-
-    if (!participants) return;
-
-    const conversationIds = participants.map(p => p.conversation_id);
-
-    // Get conversation details
-    const conversationsData: Conversation[] = [];
-    
-    for (const convId of conversationIds) {
-      // Get other participant
-      const { data: otherParticipant } = await supabase
+    try {
+      const { data: myParticipants, error: partError } = await supabase
         .from("conversation_participants")
-        .select("user_id")
-        .eq("conversation_id", convId)
-        .neq("user_id", currentUserId)
-        .single();
+        .select("conversation_id, conversation:conversations(*)")
+        .eq("user_id", currentUserId);
 
-      if (otherParticipant) {
+      if (partError) throw partError;
+      if (!myParticipants) return;
+
+      const conversationsData: Conversation[] = [];
+
+      for (const participant of myParticipants) {
+        const convId = participant.conversation_id;
+
+        const { data: otherPart } = await supabase
+          .from("conversation_participants")
+          .select("user_id")
+          .eq("conversation_id", convId)
+          .neq("user_id", currentUserId)
+          .maybeSingle();
+
+        if (!otherPart) continue;
+
         const { data: profile } = await supabase
           .from("profiles")
-          .select("id, display_name, handle, avatar_url, user_id")
-          .eq("user_id", otherParticipant.user_id)
-          .single();
+          .select("id, user_id, display_name, handle, avatar_url")
+          .eq("user_id", otherPart.user_id)
+          .maybeSingle();
 
-        // Get last message
+        if (!profile) continue;
+
         const { data: lastMsg } = await supabase
           .from("messages")
           .select("content, created_at")
           .eq("conversation_id", convId)
+          .is("deleted_at", null)
           .order("created_at", { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        const { data: conv } = await supabase
-          .from("conversations")
-          .select("*")
-          .eq("id", convId)
-          .single();
-
-        if (conv && profile) {
-          conversationsData.push({
-            id: conv.id,
-            created_at: conv.created_at,
-            updated_at: conv.updated_at,
-            other_user: {
-              id: profile.id,
-              display_name: profile.display_name,
-              handle: profile.handle,
-              avatar_url: profile.avatar_url
-            },
-            last_message: lastMsg || null
-          });
-        }
+        conversationsData.push({
+          id: convId,
+          created_at: participant.conversation?.created_at || new Date().toISOString(),
+          updated_at: participant.conversation?.updated_at || new Date().toISOString(),
+          other_user: {
+            id: profile.id,
+            user_id: profile.user_id,
+            display_name: profile.display_name,
+            handle: profile.handle,
+            avatar_url: profile.avatar_url
+          },
+          last_message: lastMsg || null
+        });
       }
-    }
 
-    setConversations(conversationsData.sort((a, b) => 
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    ));
+      setConversations(conversationsData);
+    } catch (error: any) {
+      toast({
+        title: "Error loading conversations",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
   };
 
   const fetchMessages = async (conversationId: string) => {
@@ -197,22 +227,30 @@ const Messages = () => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !selectedConversation || !currentUserId) return;
 
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: selectedConversation,
-        sender_id: currentUserId,
-        content: newMessage.trim()
-      });
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .insert({
+          conversation_id: selectedConversation,
+          sender_id: currentUserId,
+          content: newMessage.trim()
+        });
 
-    if (error) {
+      if (error) throw error;
+
+      await supabase
+        .from("conversations")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", selectedConversation);
+
+      setNewMessage("");
+      fetchConversations();
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to send message",
+        title: "Error sending message",
+        description: error.message,
         variant: "destructive"
       });
-    } else {
-      setNewMessage("");
     }
   };
 
@@ -248,23 +286,46 @@ const Messages = () => {
           
           <div className="grid md:grid-cols-3 gap-6 h-[600px]">
             {/* Conversations List */}
-            <div className="glass-card rounded-2xl p-4 overflow-hidden">
-              <h2 className="font-semibold mb-4">Conversations</h2>
-              <ScrollArea className="h-[500px]">
-                {conversations.length === 0 ? (
+            <div className="glass-card rounded-2xl p-4 overflow-hidden flex flex-col">
+              <h2 className="font-semibold mb-3">Conversations</h2>
+              
+              <div className="space-y-3 mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search conversations..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                
+                <Select value={sortBy} onValueChange={(v: "recent" | "name") => setSortBy(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Most Recent</SelectItem>
+                    <SelectItem value="name">Alphabetical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <ScrollArea className="flex-1">
+                {filteredConversations.length === 0 ? (
                   <p className="text-muted-foreground text-sm text-center py-8">
-                    No conversations yet
+                    {searchTerm ? "No conversations found" : "No conversations yet"}
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {conversations.map((conv) => (
+                    {filteredConversations.map((conv) => (
                       <button
                         key={conv.id}
                         onClick={() => setSelectedConversation(conv.id)}
-                        className={`w-full p-3 rounded-lg text-left transition-colors ${
+                        className={`w-full p-3 rounded-lg text-left transition-all ${
                           selectedConversation === conv.id
-                            ? 'bg-primary/10 border border-primary/20'
-                            : 'hover:bg-accent'
+                            ? 'bg-primary/10 border border-primary/20 shadow-sm'
+                            : 'hover:bg-accent/50'
                         }`}
                       >
                         <div className="flex items-center gap-3">
