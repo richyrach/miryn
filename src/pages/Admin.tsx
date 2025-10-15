@@ -288,14 +288,9 @@ const Admin = () => {
   };
 
   const handleUnbanUser = async (userId: string) => {
-    const { data: { session } } = await supabase.auth.getSession();
-
     const { error } = await supabase
       .from("banned_users")
-      .update({
-        unbanned_at: new Date().toISOString(),
-        unbanned_by: session?.user.id
-      })
+      .delete()
       .eq("user_id", userId)
       .is("unbanned_at", null);
 

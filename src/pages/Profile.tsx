@@ -17,6 +17,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [targetUserId, setTargetUserId] = useState<string | null>(null);
 
   useEffect(() => {
     if (handle) {
@@ -53,6 +54,7 @@ const Profile = () => {
         .single();
 
       if (profileWithUserId) {
+        setTargetUserId(profileWithUserId.user_id);
         // Get follower count
         const { data: followers } = await supabase
           .from("follows")
@@ -151,8 +153,12 @@ const Profile = () => {
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <FollowButton targetUserId={profile.id} targetHandle={profile.handle} />
-                  <MessageButton targetUserId={profile.id} targetHandle={profile.handle} />
+                  {targetUserId && (
+                    <>
+                      <FollowButton targetUserId={targetUserId} targetHandle={profile.handle} />
+                      <MessageButton targetUserId={targetUserId} targetHandle={profile.handle} />
+                    </>
+                  )}
                 </div>
                 
                 {profile.location && (

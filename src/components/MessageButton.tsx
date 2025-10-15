@@ -31,6 +31,16 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
 
     const currentUserId = session.user.id;
 
+    if (currentUserId === targetUserId) {
+      toast({
+        title: "Cannot message yourself",
+        description: "Please select another user",
+        variant: "destructive"
+      });
+      setLoading(false);
+      return;
+    }
+
     // Check if conversation already exists
     const { data: existingParticipants } = await supabase
       .from("conversation_participants")
@@ -72,11 +82,10 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
       return;
     }
 
-    // Add participants
+    // Add the other participant (current user is auto-added by trigger)
     const { error: participantsError } = await supabase
       .from("conversation_participants")
       .insert([
-        { conversation_id: newConv.id, user_id: currentUserId },
         { conversation_id: newConv.id, user_id: targetUserId }
       ]);
 
