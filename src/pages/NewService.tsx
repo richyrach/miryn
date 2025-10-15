@@ -218,15 +218,29 @@ const NewService = () => {
               {/* Category */}
               <div>
                 <Label htmlFor="category">Category*</Label>
-                <Input
-                  id="category"
-                  placeholder="e.g., Web Development, Design, Marketing"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                  maxLength={50}
-                  className="mt-1"
-                />
+                <div className="mt-1">
+                  <select
+                    id="category"
+                    className="w-full rounded-md border bg-background px-3 py-2"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {[
+                      "Web Development",
+                      "Design",
+                      "Marketing",
+                      "AI & Data",
+                      "Writing & Translation",
+                      "Video & Animation",
+                      "Music & Audio",
+                      "Consulting"
+                    ].map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </Card>
 

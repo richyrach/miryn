@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
 import { Check, Upload, User, Image as ImageIcon } from "lucide-react";
+import { useRef } from "react";
 import { getDatabaseErrorMessage } from "@/lib/errorMessages";
 
 const profileSchema = z.object({
@@ -36,6 +37,8 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -216,7 +219,7 @@ const Settings = () => {
               {/* Banner Upload */}
               <div>
                 <Label>Profile Banner</Label>
-                <div className="mt-2 relative h-48 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group">
+                <div className="mt-2 relative h-48 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group" onClick={() => bannerInputRef.current?.click()}>
                   {bannerPreview ? (
                     <img src={bannerPreview} alt="Banner preview" className="w-full h-full object-cover" />
                   ) : (
@@ -226,6 +229,7 @@ const Settings = () => {
                     </div>
                   )}
                   <input
+                    ref={bannerInputRef}
                     type="file"
                     accept="image/*"
                     onChange={handleBannerChange}
@@ -244,7 +248,7 @@ const Settings = () => {
               <div>
                 <Label>Profile Picture</Label>
                 <div className="mt-2 flex items-center gap-4">
-                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group">
+                  <div className="relative w-24 h-24 rounded-full overflow-hidden bg-muted border-2 border-dashed border-muted-foreground/20 hover:border-primary/50 transition-colors cursor-pointer group" onClick={() => avatarInputRef.current?.click()}>
                     {avatarPreview ? (
                       <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
                     ) : (
@@ -253,6 +257,7 @@ const Settings = () => {
                       </div>
                     )}
                     <input
+                      ref={avatarInputRef}
                       type="file"
                       accept="image/*"
                       onChange={handleAvatarChange}

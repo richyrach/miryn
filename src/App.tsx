@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BanGuard } from "@/components/BanGuard";
+import { ConsentManager } from "@/components/ConsentManager";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import VerifyEmail from "./pages/VerifyEmail";
@@ -21,6 +22,7 @@ import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import NewService from "./pages/NewService";
 import NotFound from "./pages/NotFound";
+import Privacy from "./pages/Privacy";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +33,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <BanGuard>
+          <ConsentManager />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Auth />} />

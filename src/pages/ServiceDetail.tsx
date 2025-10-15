@@ -18,6 +18,7 @@ import {
   Briefcase,
   User
 } from "lucide-react";
+import { ReportButton } from "@/components/ReportButton";
 
 interface Service {
   id: string;
@@ -226,12 +227,15 @@ const ServiceDetail = () => {
               )}
 
               {/* Description */}
-              <Card className="p-6">
-                <h2 className="text-xl font-bold mb-4">About This Service</h2>
-                <p className="text-muted-foreground whitespace-pre-wrap">
-                  {service.description}
-                </p>
-              </Card>
+                 <Card className="p-6">
+                   <h2 className="text-xl font-bold mb-4">About This Service</h2>
+                   <p className="text-muted-foreground whitespace-pre-wrap">
+                     {service.description}
+                   </p>
+                   <div className="pt-4">
+                     <ReportButton targetType="service" targetId={service.id} />
+                   </div>
+                 </Card>
 
               {/* Features */}
               {service.features && service.features.length > 0 && (

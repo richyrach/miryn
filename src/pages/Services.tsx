@@ -113,16 +113,22 @@ const Services = () => {
                 </div>
               </div>
               
-              <div>
-                <Label htmlFor="category">Category</Label>
-                <Input
-                  id="category"
-                  placeholder="Filter by category..."
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
+               <div>
+                 <Label htmlFor="category">Category</Label>
+                 <div className="mt-1">
+                   <select
+                     id="category"
+                     className="w-full rounded-md border bg-background px-3 py-2"
+                     value={categoryFilter}
+                     onChange={(e) => setCategoryFilter(e.target.value)}
+                   >
+                     <option value="">All categories</option>
+                     {categories.map((cat) => (
+                       <option key={cat} value={cat}>{cat}</option>
+                     ))}
+                   </select>
+                 </div>
+               </div>
             </div>
 
             {categories.length > 0 && (

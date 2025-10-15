@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ReportButton } from "@/components/ReportButton";
 
 const Project = () => {
   const { handle, projectSlug } = useParams();
@@ -134,20 +135,25 @@ const Project = () => {
               </div>
             )}
 
-            {/* CTAs */}
-            {project.ctas && project.ctas.length > 0 && (
-              <div className="flex flex-wrap gap-3 pt-6 border-t">
-                {project.ctas.map((cta: any, i: number) => (
-                  <Button key={i} className="btn-hero" asChild>
-                    <a href={cta.url} target="_blank" rel="noopener noreferrer">
-                      {cta.label}
-                      <ExternalLink className="w-4 h-4 ml-2" />
-                    </a>
-                  </Button>
-                ))}
-              </div>
-            )}
-          </div>
+             {/* CTAs */}
+             {project.ctas && project.ctas.length > 0 && (
+               <div className="flex flex-wrap gap-3 pt-6 border-t">
+                 {project.ctas.map((cta: any, i: number) => (
+                   <Button key={i} className="btn-hero" asChild>
+                     <a href={cta.url} target="_blank" rel="noopener noreferrer">
+                       {cta.label}
+                       <ExternalLink className="w-4 h-4 ml-2" />
+                     </a>
+                   </Button>
+                 ))}
+               </div>
+             )}
+
+             {/* Report */}
+             <div className="pt-6">
+               <ReportButton targetType="project" targetId={project.id} />
+             </div>
+           </div>
         </div>
       </main>
     </div>

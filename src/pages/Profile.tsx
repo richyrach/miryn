@@ -9,6 +9,7 @@ import { RoleBadge } from "@/components/RoleBadge";
 import { FollowButton } from "@/components/FollowButton";
 import { MessageButton } from "@/components/MessageButton";
 import { User, MapPin, ExternalLink } from "lucide-react";
+import { ReportButton } from "@/components/ReportButton";
 
 const Profile = () => {
   const { handle } = useParams();
@@ -152,14 +153,15 @@ const Profile = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {targetUserId && (
-                    <>
-                      <FollowButton targetUserId={targetUserId} targetHandle={profile.handle} />
-                      <MessageButton targetUserId={targetUserId} targetHandle={profile.handle} />
-                    </>
-                  )}
-                </div>
+                 <div className="flex flex-wrap gap-2 mb-4">
+                   {targetUserId && (
+                     <>
+                       <FollowButton targetUserId={targetUserId} targetHandle={profile.handle} />
+                       <MessageButton targetUserId={targetUserId} targetHandle={profile.handle} />
+                       <ReportButton targetType="user" targetId={targetUserId} />
+                     </>
+                   )}
+                 </div>
                 
                 {profile.location && (
                   <p className="flex items-center gap-2 text-muted-foreground mb-4">

@@ -302,6 +302,42 @@ export type Database = {
           },
         ]
       }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_requests: {
         Row: {
           budget: number | null
@@ -607,6 +643,8 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "admin" | "moderator" | "user"
+      report_status: "open" | "reviewing" | "resolved" | "dismissed"
+      report_target: "user" | "project" | "service" | "message"
       subscription_tier: "free" | "premium_user" | "premium_seller"
     }
     CompositeTypes: {
@@ -736,6 +774,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "admin", "moderator", "user"],
+      report_status: ["open", "reviewing", "resolved", "dismissed"],
+      report_target: ["user", "project", "service", "message"],
       subscription_tier: ["free", "premium_user", "premium_seller"],
     },
   },

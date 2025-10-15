@@ -51,7 +51,9 @@ const Admin = () => {
   const [users, setUsers] = useState<UserWithWarnings[]>([]);
   const [bannedUsers, setBannedUsers] = useState<any[]>([]);
   const [warnings, setWarnings] = useState<any[]>([]);
-
+  const [reports, setReports] = useState<any[]>([]);
+  const [userSearch, setUserSearch] = useState("");
+ 
   useEffect(() => {
     checkAdminStatus();
   }, []);
@@ -85,6 +87,7 @@ const Admin = () => {
     fetchUsers();
     fetchBannedUsers();
     fetchWarnings();
+    fetchReports();
     setLoading(false);
   };
 
@@ -180,6 +183,43 @@ const Admin = () => {
       );
 
       setWarnings(warningsWithUsers);
+    }
+  };
+
+  const fetchReports = async () => {
+    const { data } = await supabase
+      .from("reports")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    setReports(data || []);
+  };
+
+  const updateReportStatus = async (id: string, status: string) => {
+    const { error } = await supabase
+      .from("reports")
+      .update({ status })
+      .eq("id", id);
+    if (!error) fetchReports();
+  };
+
+  const adminUnpublishProject = async (projectId: string) => {
+    const { error } = await supabase
+      .from("projects")
+      .update({ published: false })
+      .eq("id", projectId);
+    if (!error) {
+      toast({ title: "Project unpublished" });
+    }
+  };
+
+  const adminDeactivateService = async (serviceId: string) => {
+    const { error } = await supabase
+      .from("services")
+      .update({ active: false })
+      .eq("id", serviceId);
+    if (!error) {
+      toast({ title: "Service deactivated" });
     }
   };
 
@@ -383,12 +423,13 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsList className="grid w-full grid-cols-4 max-w-xl">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="bans">Banned Users</TabsTrigger>
               <TabsTrigger value="warnings">Warnings</TabsTrigger>
+              <TabsTrigger value="reports">Reports</TabsTrigger>
             </TabsList>
-
+ 
             {/* Users Tab */}
             <TabsContent value="users">
               <div className="glass-card rounded-2xl p-6">
@@ -405,7 +446,13 @@ const Admin = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map((user) => (
+                      {users
+                        .filter(u =>
+                          !userSearch ||
+                          u.handle.toLowerCase().includes(userSearch.toLowerCase()) ||
+                          u.display_name.toLowerCase().includes(userSearch.toLowerCase())
+                        )
+                        .map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>@{user.handle}</TableCell>
                           <TableCell>{user.display_name}</TableCell>
