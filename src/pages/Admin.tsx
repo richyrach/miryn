@@ -248,9 +248,10 @@ const Admin = () => {
       });
 
     if (error) {
+      console.error("Announcement creation error:", error);
       toast({
-        title: "Error",
-        description: "Failed to create announcement",
+        title: "Failed to create announcement",
+        description: error.message || "Unknown error occurred",
         variant: "destructive"
       });
     } else {

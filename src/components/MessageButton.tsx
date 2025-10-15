@@ -70,18 +70,42 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
         .select()
         .single();
 
-      if (convError || !newConv) throw convError || new Error("Failed to create conversation");
+      if (convError || !newConv) {
+        throw convError || new Error("Failed to create conversation");
+      }
 
-      // Add both participants in a single transaction
-      // First add yourself (the creator), then add the target user
-      const { error: participantError } = await supabase
+      // Step 1: Add yourself as the creator first
+      const { error: creatorError } = await supabase
         .from("conversation_participants")
-        .insert([
-          { conversation_id: newConv.id, user_id: currentUserId },  // Add creator
-          { conversation_id: newConv.id, user_id: targetUserId }    // Add target user
-        ]);
+        .insert({ conversation_id: newConv.id, user_id: currentUserId });
 
-      if (participantError) throw participantError;
+      if (creatorError) {
+        throw new Error(`Failed to add creator: ${creatorError.message}`);
+      }
+
+      // Step 2: Add the target user (with retry for RLS visibility lag)
+      let targetError = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        const { error } = await supabase
+          .from("conversation_participants")
+          .insert({ conversation_id: newConv.id, user_id: targetUserId });
+        
+        if (!error) {
+          targetError = null;
+          break;
+        }
+        
+        targetError = error;
+        
+        // Small delay before retry
+        if (attempt === 0) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+        }
+      }
+
+      if (targetError) {
+        throw new Error(`Failed to add participant: ${targetError.message}`);
+      }
 
       toast({
         title: "Conversation started",
@@ -90,9 +114,10 @@ export const MessageButton = ({ targetUserId, targetHandle }: MessageButtonProps
       
       navigate("/messages");
     } catch (error: any) {
+      console.error("MessageButton error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to start conversation",
+        title: "Failed to start conversation",
+        description: error.message || "Please try again",
         variant: "destructive"
       });
     } finally {
