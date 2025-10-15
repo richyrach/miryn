@@ -5,7 +5,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Shield, UserX, UserCheck, AlertTriangle, Ban, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Shield, UserX, UserCheck, AlertTriangle, Ban, Clock, Megaphone } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -47,12 +48,16 @@ const Admin = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserWithWarnings[]>([]);
   const [bannedUsers, setBannedUsers] = useState<any[]>([]);
   const [warnings, setWarnings] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState("");
+  const [announcementTitle, setAnnouncementTitle] = useState("");
+  const [announcementMessage, setAnnouncementMessage] = useState("");
  
   useEffect(() => {
     checkAdminStatus();
@@ -83,11 +88,19 @@ const Admin = () => {
       return;
     }
 
+    // Get highest role for hierarchy checks
+    const highestRole = roles?.sort((a, b) => {
+      const roleOrder = { owner: 1, admin: 2, moderator: 3 };
+      return (roleOrder[a.role as keyof typeof roleOrder] || 4) - (roleOrder[b.role as keyof typeof roleOrder] || 4);
+    })[0]?.role;
+
+    setCurrentUserRole(highestRole || null);
     setIsAdmin(true);
     fetchUsers();
     fetchBannedUsers();
     fetchWarnings();
     fetchReports();
+    fetchAnnouncements();
     setLoading(false);
   };
 
@@ -195,12 +208,99 @@ const Admin = () => {
     setReports(data || []);
   };
 
+  const fetchAnnouncements = async () => {
+    const { data } = await supabase
+      .from("announcements")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setAnnouncements(data || []);
+  };
+
   const updateReportStatus = async (id: string, status: "open" | "reviewing" | "resolved" | "dismissed") => {
     const { error } = await supabase
       .from("reports")
       .update({ status })
       .eq("id", id);
     if (!error) fetchReports();
+  };
+
+  const createAnnouncement = async () => {
+    if (!announcementTitle.trim() || !announcementMessage.trim()) {
+      toast({
+        title: "Error",
+        description: "Please fill in both title and message",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { error } = await supabase
+      .from("announcements")
+      .insert({
+        title: announcementTitle,
+        message: announcementMessage,
+        created_by: session.user.id,
+        active: true
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create announcement",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Announcement created and sent to all users"
+      });
+      setAnnouncementTitle("");
+      setAnnouncementMessage("");
+      fetchAnnouncements();
+    }
+  };
+
+  const deactivateAnnouncement = async (id: string) => {
+    const { error } = await supabase
+      .from("announcements")
+      .update({ active: false })
+      .eq("id", id);
+
+    if (!error) {
+      toast({
+        title: "Success",
+        description: "Announcement deactivated"
+      });
+      fetchAnnouncements();
+    }
+  };
+
+  // Check if current user can moderate target user based on role hierarchy
+  const canModerateUser = (targetRole: string): boolean => {
+    if (!currentUserRole) return false;
+    
+    const roleHierarchy = { owner: 1, admin: 2, moderator: 3, user: 4 };
+    const currentLevel = roleHierarchy[currentUserRole as keyof typeof roleHierarchy] || 4;
+    const targetLevel = roleHierarchy[targetRole as keyof typeof roleHierarchy] || 4;
+    
+    // Owner can moderate anyone
+    if (currentUserRole === 'owner') return true;
+    
+    // Admin can moderate moderators and users, but not owners or other admins
+    if (currentUserRole === 'admin') {
+      return !['owner', 'admin'].includes(targetRole);
+    }
+    
+    // Moderators can only moderate regular users
+    if (currentUserRole === 'moderator') {
+      return !['owner', 'admin', 'moderator'].includes(targetRole);
+    }
+    
+    return false;
   };
 
   const adminUnpublishProject = async (projectId: string) => {
@@ -423,18 +523,22 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-4 max-w-xl">
+            <TabsList className="grid w-full grid-cols-5 max-w-3xl">
               <TabsTrigger value="users">Users</TabsTrigger>
-              <TabsTrigger value="bans">Banned Users</TabsTrigger>
+              <TabsTrigger value="bans">Bans</TabsTrigger>
               <TabsTrigger value="warnings">Warnings</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="announcements">
+                <Megaphone className="w-4 h-4 mr-2" />
+                Announcements
+              </TabsTrigger>
             </TabsList>
  
             {/* Users Tab */}
             <TabsContent value="users">
-              <div className="glass-card rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-4">All Users</h2>
-                <div className="overflow-x-auto">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">All Users</h2>
+                <div className="overflow-x-auto -mx-4 sm:mx-0">
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -473,7 +577,7 @@ const Admin = () => {
                               {/* Warn User */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline">
+                                  <Button size="sm" variant="outline" disabled={!canModerateUser(user.role)}>
                                     <AlertTriangle className="w-4 h-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -529,7 +633,7 @@ const Admin = () => {
                               {/* Ban User */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="destructive">
+                                  <Button size="sm" variant="destructive" disabled={!canModerateUser(user.role)}>
                                     <Ban className="w-4 h-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -637,12 +741,12 @@ const Admin = () => {
 
             {/* Banned Users Tab */}
             <TabsContent value="bans">
-              <div className="glass-card rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-4">Banned Users</h2>
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Banned Users</h2>
                 {bannedUsers.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No banned users</p>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -695,12 +799,12 @@ const Admin = () => {
 
             {/* Warnings Tab */}
             <TabsContent value="warnings">
-              <div className="glass-card rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-4">Recent Warnings</h2>
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Recent Warnings</h2>
                 {warnings.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No warnings issued</p>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -733,12 +837,12 @@ const Admin = () => {
 
             {/* Reports Tab */}
             <TabsContent value="reports">
-              <div className="glass-card rounded-2xl p-6">
-                <h2 className="text-2xl font-bold mb-4">User Reports</h2>
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">User Reports</h2>
                 {reports.length === 0 ? (
                   <p className="text-muted-foreground text-center py-8">No reports submitted</p>
                 ) : (
-                  <div className="overflow-x-auto">
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -820,6 +924,82 @@ const Admin = () => {
                         ))}
                       </TableBody>
                     </Table>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Announcements Tab */}
+            <TabsContent value="announcements">
+              <div className="glass-card rounded-2xl p-4 sm:p-6 mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Create Announcement</h2>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="announcement-title">Title</Label>
+                    <Input
+                      id="announcement-title"
+                      value={announcementTitle}
+                      onChange={(e) => setAnnouncementTitle(e.target.value)}
+                      placeholder="Announcement title..."
+                      maxLength={100}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="announcement-message">Message</Label>
+                    <Textarea
+                      id="announcement-message"
+                      value={announcementMessage}
+                      onChange={(e) => setAnnouncementMessage(e.target.value)}
+                      placeholder="Announcement message..."
+                      maxLength={500}
+                      rows={4}
+                    />
+                  </div>
+                  <Button onClick={createAnnouncement} className="w-full sm:w-auto">
+                    <Megaphone className="w-4 h-4 mr-2" />
+                    Send to All Users
+                  </Button>
+                </div>
+              </div>
+
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Past Announcements</h2>
+                {announcements.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No announcements yet</p>
+                ) : (
+                  <div className="space-y-4">
+                    {announcements.map((announcement) => (
+                      <div
+                        key={announcement.id}
+                        className="border rounded-lg p-4"
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{announcement.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {formatDistanceToNow(new Date(announcement.created_at), {
+                                addSuffix: true,
+                              })}
+                            </p>
+                          </div>
+                          {announcement.active ? (
+                            <Badge variant="default">Active</Badge>
+                          ) : (
+                            <Badge variant="secondary">Deactivated</Badge>
+                          )}
+                        </div>
+                        <p className="text-muted-foreground mb-4">{announcement.message}</p>
+                        {announcement.active && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deactivateAnnouncement(announcement.id)}
+                          >
+                            Deactivate
+                          </Button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>

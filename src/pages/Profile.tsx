@@ -170,14 +170,14 @@ const Profile = () => {
                   </p>
                 )}
 
-                {profile.bio && (
-                  <p className="text-foreground mb-4 max-w-2xl">{profile.bio}</p>
+                 {profile.bio && (
+                  <p className="text-foreground mb-4 max-w-2xl break-words">{profile.bio}</p>
                 )}
 
                 {profile.skills && profile.skills.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-4">
                     {profile.skills.map((skill: string, i: number) => (
-                      <Badge key={i} variant="secondary">{skill}</Badge>
+                      <Badge key={i} variant="secondary" className="text-xs sm:text-sm">{skill}</Badge>
                     ))}
                   </div>
                 )}

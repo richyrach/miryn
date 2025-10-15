@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { NotificationBell } from "./NotificationBell";
 
 export const Navbar = () => {
   const navigate = useNavigate();
@@ -90,9 +91,12 @@ export const Navbar = () => {
             </Link>
 
             {user && (
-              <Link to="/messages" className="text-foreground hover:text-primary transition-colors">
-                <MessageCircle className="w-5 h-5" />
-              </Link>
+              <>
+                <Link to="/messages" className="text-foreground hover:text-primary transition-colors">
+                  <MessageCircle className="w-5 h-5" />
+                </Link>
+                <NotificationBell />
+              </>
             )}
 
             {user ? (
@@ -198,6 +202,16 @@ export const Navbar = () => {
 
                   {user ? (
                     <>
+                      <div className="border-t pt-4 flex gap-2">
+                        <Button variant="ghost" size="sm" asChild className="flex-1 justify-start">
+                          <Link to="/messages" onClick={() => setMobileMenuOpen(false)}>
+                            <MessageCircle className="w-4 h-4 mr-2" />
+                            Messages
+                          </Link>
+                        </Button>
+                        <NotificationBell />
+                      </div>
+                      
                       <div className="border-t pt-4">
                         <Button variant="ghost" size="sm" asChild className="w-full justify-start">
                           <Link to="/new" onClick={() => setMobileMenuOpen(false)}>
