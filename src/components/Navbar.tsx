@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase, Menu, X } from "lucide-react";
+import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase, Menu, X, MessageSquareWarning } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -131,6 +131,12 @@ export const Navbar = () => {
                         Settings
                       </Link>
                     </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/feedback" className="cursor-pointer">
+                        <MessageSquareWarning className="w-4 h-4 mr-2" />
+                        Feedback
+                      </Link>
+                    </DropdownMenuItem>
                     {isAdmin && (
                       <>
                         <DropdownMenuSeparator />
@@ -234,6 +240,12 @@ export const Navbar = () => {
                           <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
                             <Settings className="w-4 h-4 mr-2" />
                             Settings
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild className="w-full justify-start mb-2">
+                          <Link to="/feedback" onClick={() => setMobileMenuOpen(false)}>
+                            <MessageSquareWarning className="w-4 h-4 mr-2" />
+                            Feedback
                           </Link>
                         </Button>
                         {isAdmin && (

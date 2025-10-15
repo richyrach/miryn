@@ -31,10 +31,10 @@ const Profile = () => {
     setLoading(true);
     
     const { data: profileData } = await supabase
-      .from("public_profiles")
+      .from("profiles")
       .select("*")
       .eq("handle", handle)
-      .single();
+      .maybeSingle();
 
     if (profileData) {
       setProfile(profileData);

@@ -26,6 +26,7 @@ import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
 import Warning from "./pages/Warning";
 import Banned from "./pages/Banned";
+import Feedback from "./pages/Feedback";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/services/new" element={<NewService />} />
               <Route path="/services/:serviceId" element={<ServiceDetail />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/feedback" element={<Feedback />} />
               <Route path="/:handle" element={<Profile />} />
               <Route path="/:handle/:projectSlug" element={<Project />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

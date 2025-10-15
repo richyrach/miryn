@@ -124,6 +124,45 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          screenshot_url: string | null
+          status: Database["public"]["Enums"]["feedback_status"]
+          title: string
+          type: Database["public"]["Enums"]["feedback_type"]
+          updated_at: string
+          url: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["feedback_status"]
+          title: string
+          type: Database["public"]["Enums"]["feedback_type"]
+          updated_at?: string
+          url?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          screenshot_url?: string | null
+          status?: Database["public"]["Enums"]["feedback_status"]
+          title?: string
+          type?: Database["public"]["Enums"]["feedback_type"]
+          updated_at?: string
+          url?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string | null
@@ -622,6 +661,7 @@ export type Database = {
       }
       user_warnings: {
         Row: {
+          acknowledged_at: string | null
           created_at: string | null
           id: string
           reason: string
@@ -630,6 +670,7 @@ export type Database = {
           warned_by: string | null
         }
         Insert: {
+          acknowledged_at?: string | null
           created_at?: string | null
           id?: string
           reason: string
@@ -638,6 +679,7 @@ export type Database = {
           warned_by?: string | null
         }
         Update: {
+          acknowledged_at?: string | null
           created_at?: string | null
           id?: string
           reason?: string
@@ -726,7 +768,16 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "owner" | "admin" | "moderator" | "user"
+      app_role:
+        | "owner"
+        | "admin"
+        | "moderator"
+        | "user"
+        | "support"
+        | "content_mod"
+        | "junior_mod"
+      feedback_status: "open" | "in_progress" | "resolved" | "dismissed"
+      feedback_type: "bug" | "suggestion"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       report_target: "user" | "project" | "service" | "message"
       subscription_tier: "free" | "premium_user" | "premium_seller"
@@ -857,7 +908,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["owner", "admin", "moderator", "user"],
+      app_role: [
+        "owner",
+        "admin",
+        "moderator",
+        "user",
+        "support",
+        "content_mod",
+        "junior_mod",
+      ],
+      feedback_status: ["open", "in_progress", "resolved", "dismissed"],
+      feedback_type: ["bug", "suggestion"],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       report_target: ["user", "project", "service", "message"],
       subscription_tier: ["free", "premium_user", "premium_seller"],

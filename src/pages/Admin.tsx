@@ -40,7 +40,8 @@ interface UserWithWarnings {
   id: string;
   handle: string;
   display_name: string;
-  role: string;
+  user_id: string;
+  roles: string[];
   warning_count: number;
 }
 
@@ -55,6 +56,7 @@ const Admin = () => {
   const [warnings, setWarnings] = useState<any[]>([]);
   const [reports, setReports] = useState<any[]>([]);
   const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [announcementTitle, setAnnouncementTitle] = useState("");
   const [announcementMessage, setAnnouncementMessage] = useState("");
@@ -101,43 +103,41 @@ const Admin = () => {
     fetchWarnings();
     fetchReports();
     fetchAnnouncements();
+    fetchFeedback();
     setLoading(false);
   };
 
   const fetchUsers = async () => {
     const { data } = await supabase
-      .from("public_profiles")
-      .select("*")
+      .from("profiles")
+      .select("id, handle, display_name, user_id, created_at")
       .order("created_at", { ascending: false });
     
     if (data) {
-      // Get warning counts for each user
-      const usersWithWarnings = await Promise.all(
+      // Get roles and warning counts for each user
+      const usersWithData = await Promise.all(
         data.map(async (user) => {
-          // Get user_id from profiles table
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("user_id")
-            .eq("id", user.id)
-            .single();
+          // Get roles
+          const { data: rolesData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", user.user_id);
 
-          if (!profile) {
-            return { ...user, warning_count: 0 };
-          }
-
+          // Get warning count
           const { data: warningData } = await supabase
             .from("user_warnings")
             .select("id")
-            .eq("user_id", profile.user_id);
+            .eq("user_id", user.user_id);
 
           return {
             ...user,
+            roles: rolesData?.map(r => r.role) || [],
             warning_count: warningData?.length || 0
           };
         })
       );
 
-      setUsers(usersWithWarnings);
+      setUsers(usersWithData);
     }
   };
 
@@ -281,27 +281,32 @@ const Admin = () => {
   };
 
   // Check if current user can moderate target user based on role hierarchy
-  const canModerateUser = (targetRole: string): boolean => {
+  const canModerateUser = (targetRoles: string[]): boolean => {
     if (!currentUserRole) return false;
     
-    const roleHierarchy = { owner: 1, admin: 2, moderator: 3, user: 4 };
-    const currentLevel = roleHierarchy[currentUserRole as keyof typeof roleHierarchy] || 4;
-    const targetLevel = roleHierarchy[targetRole as keyof typeof roleHierarchy] || 4;
+    // If user has no roles, they can be moderated by anyone with a staff role
+    if (targetRoles.length === 0) return true;
+    
+    const roleHierarchy = { owner: 1, admin: 2, moderator: 3, content_mod: 4, junior_mod: 5, support: 6, user: 7 };
+    const currentLevel = roleHierarchy[currentUserRole as keyof typeof roleHierarchy] || 7;
+    
+    // Get the highest (lowest number) role of the target user
+    const targetHighestLevel = Math.min(...targetRoles.map(r => roleHierarchy[r as keyof typeof roleHierarchy] || 7));
     
     // Owner can moderate anyone
     if (currentUserRole === 'owner') return true;
     
-    // Admin can moderate moderators and users, but not owners or other admins
+    // Admin can moderate moderators and other staff, but not owners or other admins
     if (currentUserRole === 'admin') {
-      return !['owner', 'admin'].includes(targetRole);
+      return targetHighestLevel > 2; // Can't moderate owner (1) or admin (2)
     }
     
-    // Moderators can only moderate regular users
+    // Moderators can only moderate lower staff and regular users
     if (currentUserRole === 'moderator') {
-      return !['owner', 'admin', 'moderator'].includes(targetRole);
+      return targetHighestLevel > 3; // Can't moderate owner, admin, or moderator
     }
     
-    return false;
+    return currentLevel < targetHighestLevel;
   };
 
   const adminUnpublishProject = async (projectId: string) => {
@@ -487,27 +492,11 @@ const Admin = () => {
     }
   };
 
-  const handleRemoveRole = async (userId: string, role: string) => {
-    // Get actual user_id from profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("user_id")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!profile) {
-      toast({
-        title: "Error",
-        description: "User not found",
-        variant: "destructive"
-      });
-      return;
-    }
-
+  const handleRemoveRole = async (userUserId: string, role: string) => {
     const { error } = await supabase
       .from("user_roles")
       .delete()
-      .eq("user_id", profile.user_id)
+      .eq("user_id", userUserId)
       .eq("role", role as any);
 
     if (error) {
@@ -519,6 +508,51 @@ const Admin = () => {
     } else {
       toast({ title: `Role '${role}' removed successfully` });
       fetchUsers();
+    }
+  };
+
+  const fetchFeedback = async () => {
+    const { data } = await supabase
+      .from("feedback")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (data) {
+      const feedbackWithUsers = await Promise.all(
+        data.map(async (item) => {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("handle, display_name")
+            .eq("user_id", item.user_id)
+            .maybeSingle();
+
+          return {
+            ...item,
+            handle: profile?.handle || "Unknown",
+            display_name: profile?.display_name || "Unknown User"
+          };
+        })
+      );
+
+      setFeedback(feedbackWithUsers);
+    }
+  };
+
+  const updateFeedbackStatus = async (feedbackId: string, status: string) => {
+    const { error } = await supabase
+      .from("feedback")
+      .update({ status: status as any })
+      .eq("id", feedbackId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update feedback status",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Status updated successfully" });
+      fetchFeedback();
     }
   };
 
@@ -559,12 +593,13 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-6 max-w-4xl">
+            <TabsList className="grid w-full grid-cols-7 max-w-5xl">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="bans">Bans</TabsTrigger>
               <TabsTrigger value="warnings">Warnings</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
+              <TabsTrigger value="feedback">Feedback</TabsTrigger>
               <TabsTrigger value="announcements">
                 <Megaphone className="w-4 h-4 mr-2" />
                 Announcements
@@ -598,20 +633,28 @@ const Admin = () => {
                           <TableCell>@{user.handle}</TableCell>
                           <TableCell>{user.display_name}</TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <span className={user.role !== 'user' ? 'text-primary font-semibold' : ''}>
-                                {user.role}
-                              </span>
-                              {user.role !== 'user' && currentUserRole === 'owner' && canModerateUser(user.role) && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={() => handleRemoveRole(user.id, user.role)}
-                                  title="Remove role"
-                                >
-                                  <UserX className="w-3 h-3" />
-                                </Button>
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.length === 0 ? (
+                                <Badge variant="secondary">user</Badge>
+                              ) : (
+                                user.roles.map((role) => (
+                                  <div key={role} className="flex items-center gap-1">
+                                    <Badge variant="default" className="text-primary">
+                                      {role}
+                                    </Badge>
+                                    {currentUserRole === 'owner' && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="h-5 w-5 p-0"
+                                        onClick={() => handleRemoveRole(user.user_id, role)}
+                                        title="Remove role"
+                                      >
+                                        <UserX className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                ))
                               )}
                             </div>
                           </TableCell>
@@ -627,7 +670,7 @@ const Admin = () => {
                               {/* Warn User */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline" disabled={!canModerateUser(user.role)}>
+                                  <Button size="sm" variant="outline" disabled={!canModerateUser(user.roles)}>
                                     <AlertTriangle className="w-4 h-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -683,7 +726,7 @@ const Admin = () => {
                               {/* Ban User */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="destructive" disabled={!canModerateUser(user.role)}>
+                                  <Button size="sm" variant="destructive" disabled={!canModerateUser(user.roles)}>
                                     <Ban className="w-4 h-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -995,6 +1038,100 @@ const Admin = () => {
                                   </Button>
                                 )}
                               </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Feedback Tab */}
+            <TabsContent value="feedback">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">User Feedback</h2>
+                {feedback.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">No feedback submitted yet</p>
+                ) : (
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Title</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {feedback.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell>
+                              <Badge variant={item.type === 'bug' ? 'destructive' : 'default'}>
+                                {item.type === 'bug' ? '🐛 Bug' : '💡 Suggestion'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="font-medium">{item.title}</TableCell>
+                            <TableCell>@{item.handle}</TableCell>
+                            <TableCell>
+                              <Select
+                                value={item.status}
+                                onValueChange={(value) => updateFeedbackStatus(item.id, value)}
+                              >
+                                <SelectTrigger className="w-32">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="open">Open</SelectItem>
+                                  <SelectItem value="in_progress">In Progress</SelectItem>
+                                  <SelectItem value="resolved">Resolved</SelectItem>
+                                  <SelectItem value="dismissed">Dismissed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </TableCell>
+                            <TableCell className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                            </TableCell>
+                            <TableCell>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button size="sm" variant="outline">View</Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl">
+                                  <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2">
+                                      {item.type === 'bug' ? '🐛' : '💡'} {item.title}
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                      Submitted by @{item.handle} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h4 className="font-semibold mb-2">Description</h4>
+                                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.description}</p>
+                                    </div>
+                                    {item.url && (
+                                      <div>
+                                        <h4 className="font-semibold mb-2">Related URL</h4>
+                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                          {item.url}
+                                        </a>
+                                      </div>
+                                    )}
+                                    {item.screenshot_url && (
+                                      <div>
+                                        <h4 className="font-semibold mb-2">Screenshot</h4>
+                                        <img src={item.screenshot_url} alt="Feedback screenshot" className="rounded-lg border max-w-full" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                             </TableCell>
                           </TableRow>
                         ))}
