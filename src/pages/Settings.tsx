@@ -33,6 +33,9 @@ const Settings = () => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -384,6 +387,67 @@ const Settings = () => {
                     Saved!
                   </>
                 ) : "Save Changes"}
+              </Button>
+            </form>
+          </div>
+
+          <div className="glass-card rounded-2xl p-8 mt-8">
+            <h2 className="text-2xl font-semibold mb-4">Change Password</h2>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!userId) return;
+                if (newPassword !== confirmPassword) {
+                  toast({ title: "Passwords do not match", variant: "destructive" });
+                  return;
+                }
+                if (newPassword.length < 12) {
+                  toast({ title: "Password too short", description: "Use at least 12 characters.", variant: "destructive" });
+                  return;
+                }
+                try {
+                  setPwLoading(true);
+                  const { error } = await supabase.auth.updateUser({ password: newPassword });
+                  if (error) throw error;
+                  toast({ title: "Password updated" });
+                  setNewPassword("");
+                  setConfirmPassword("");
+                } catch (err: any) {
+                  toast({ title: "Error updating password", description: getDatabaseErrorMessage(err), variant: "destructive" });
+                } finally {
+                  setPwLoading(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  minLength={12}
+                  required
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  12+ chars, include upper, lower, number, special.
+                </p>
+              </div>
+              <div>
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={pwLoading}>
+                {pwLoading ? "Updating..." : "Update Password"}
               </Button>
             </form>
           </div>

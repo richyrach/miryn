@@ -53,16 +53,9 @@ const Auth = () => {
         description: getAuthErrorMessage(error), 
         variant: "destructive" 
       });
-    } else if (data.user && !data.user.confirmed_at) {
-      toast({ 
-        title: "Check your email!",
-        description: "We sent you a verification link. Please check your inbox.",
-        duration: 10000
-      });
-      setTimeout(() => navigate("/verify-email"), 1500);
     } else {
-      toast({ title: "Success! Redirecting..." });
-      setTimeout(() => navigate("/onboarding"), 1000);
+      toast({ title: "Account created!", description: "You're all set—no email verification needed.", duration: 6000 });
+      setTimeout(() => navigate("/onboarding"), 800);
     }
 
     setLoading(false);
