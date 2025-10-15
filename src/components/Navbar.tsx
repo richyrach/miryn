@@ -1,25 +1,66 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { User, LogOut, Settings, PlusCircle } from "lucide-react";
+import { User, LogOut, Settings, PlusCircle, Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [handle, setHandle] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserData(session.user.id);
+      } else {
+        setHandle(null);
+        setIsAdmin(false);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchUserData = async (userId: string) => {
+    // Get profile handle
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("handle")
+      .eq("user_id", userId)
+      .single();
+    
+    if (profile) {
+      setHandle(profile.handle);
+    }
+
+    // Check admin status
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    
+    const hasAdminRole = roles?.some(r => ['owner', 'admin', 'moderator'].includes(r.role));
+    setIsAdmin(hasAdminRole || false);
+  };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
@@ -50,18 +91,52 @@ export const Navbar = () => {
                     New
                   </Link>
                 </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link to="/settings">
-                    <Settings className="w-4 h-4" />
-                  </Link>
-                </Button>
-                <Button variant="ghost" size="sm" onClick={handleSignOut}>
-                  <LogOut className="w-4 h-4" />
-                </Button>
+                
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <User className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 bg-background border z-50">
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {handle && (
+                      <DropdownMenuItem asChild>
+                        <Link to={`/${handle}`} className="cursor-pointer">
+                          <User className="w-4 h-4 mr-2" />
+                          View Profile
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem asChild>
+                      <Link to="/settings" className="cursor-pointer">
+                        <Settings className="w-4 h-4 mr-2" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer text-primary">
+                            <Shield className="w-4 h-4 mr-2" />
+                            Admin Panel
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <Button asChild className="btn-hero">
-                <Link to="/login">
+                <Link to="/auth">
                   <User className="w-4 h-4 mr-2" />
                   Sign in
                 </Link>
