@@ -10,6 +10,7 @@ import { FollowButton } from "@/components/FollowButton";
 import { MessageButton } from "@/components/MessageButton";
 import { User, MapPin, ExternalLink } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
+import { SocialLinks } from "@/components/SocialLinks";
 
 const Profile = () => {
   const { handle } = useParams();
@@ -181,6 +182,14 @@ const Profile = () => {
                     ))}
                   </div>
                 )}
+
+                {/* Social and Custom Links */}
+                <div className="mb-6">
+                  <SocialLinks 
+                    socialLinks={profile.social_links || []} 
+                    customLinks={profile.custom_links || []} 
+                  />
+                </div>
 
                 {profile.primary_cta_url && (
                   <Button className="btn-hero" asChild>

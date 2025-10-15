@@ -16,9 +16,22 @@ import {
   Clock, 
   CheckCircle, 
   Briefcase,
-  User
+  User,
+  Pencil,
+  Trash2
 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Service {
   id: string;
@@ -51,6 +64,8 @@ const ServiceDetail = () => {
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [isOwner, setIsOwner] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (serviceId) {
@@ -64,7 +79,7 @@ const ServiceDetail = () => {
       .from("services")
       .select(`
         *,
-        public_profiles!inner(handle, display_name, avatar_url, bio)
+        public_profiles!inner(handle, display_name, avatar_url, bio, user_id)
       `)
       .eq("id", serviceId)
       .eq("active", true)
@@ -82,8 +97,39 @@ const ServiceDetail = () => {
       if (data.price_amount) {
         setBudget(data.price_amount.toString());
       }
+
+      // Check if current user is the owner
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && (data as any).public_profiles.user_id === session.user.id) {
+        setIsOwner(true);
+      }
     }
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!service) return;
+    
+    setDeleting(true);
+    const { error } = await supabase
+      .from("services")
+      .delete()
+      .eq("id", service.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete service",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Service deleted successfully",
+      });
+      navigate("/services");
+    }
+    setDeleting(false);
   };
 
   const handleRequestService = async () => {
@@ -187,9 +233,47 @@ const ServiceDetail = () => {
             <div className="lg:col-span-2 space-y-6">
               {/* Service Header */}
               <div>
-                <Badge variant="outline" className="mb-3">
-                  {service.category}
-                </Badge>
+                <div className="flex items-start justify-between mb-3">
+                  <Badge variant="outline">
+                    {service.category}
+                  </Badge>
+                  
+                  {isOwner && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/services/${service.id}/edit`)}
+                      >
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="destructive" size="sm" disabled={deleting}>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete Service?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your service
+                              and all associated requests.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                              Delete Service
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
+                  )}
+                </div>
                 <h1 className="text-4xl font-bold mb-4">{service.title}</h1>
                 
                 {/* Seller Info */}

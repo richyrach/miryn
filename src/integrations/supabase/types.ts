@@ -230,6 +230,7 @@ export type Database = {
           banner_url: string | null
           bio: string | null
           created_at: string
+          custom_links: Json | null
           display_name: string
           handle: string
           hireable: boolean
@@ -238,7 +239,10 @@ export type Database = {
           location: string | null
           primary_cta: string | null
           primary_cta_url: string | null
+          profile_layout: string | null
           skills: string[] | null
+          social_links: Json | null
+          theme_color: string | null
           updated_at: string
           user_id: string
         }
@@ -247,6 +251,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_links?: Json | null
           display_name: string
           handle: string
           hireable?: boolean
@@ -255,7 +260,10 @@ export type Database = {
           location?: string | null
           primary_cta?: string | null
           primary_cta_url?: string | null
+          profile_layout?: string | null
           skills?: string[] | null
+          social_links?: Json | null
+          theme_color?: string | null
           updated_at?: string
           user_id: string
         }
@@ -264,6 +272,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string
+          custom_links?: Json | null
           display_name?: string
           handle?: string
           hireable?: boolean
@@ -272,7 +281,10 @@ export type Database = {
           location?: string | null
           primary_cta?: string | null
           primary_cta_url?: string | null
+          profile_layout?: string | null
           skills?: string[] | null
+          social_links?: Json | null
+          theme_color?: string | null
           updated_at?: string
           user_id?: string
         }

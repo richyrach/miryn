@@ -1,17 +1,33 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, ArrowLeft } from "lucide-react";
+import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
+import { useToast } from "@/hooks/use-toast";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const Project = () => {
   const { handle, projectSlug } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [project, setProject] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (handle && projectSlug) {
@@ -39,9 +55,40 @@ const Project = () => {
         .single();
 
       setProject(projectData);
+
+      // Check if current user is the owner
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && profileData.user_id === session.user.id) {
+        setIsOwner(true);
+      }
     }
     
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    if (!project) return;
+    
+    setDeleting(true);
+    const { error } = await supabase
+      .from("projects")
+      .delete()
+      .eq("id", project.id);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete project",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: "Project deleted successfully",
+      });
+      navigate(`/${handle}`);
+    }
+    setDeleting(false);
   };
 
   if (loading) {
@@ -92,7 +139,45 @@ const Project = () => {
           )}
 
           <div className="glass-card rounded-2xl p-8 mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{project.title}</h1>
+            <div className="flex items-start justify-between mb-4">
+              <h1 className="text-4xl md:text-5xl font-bold">{project.title}</h1>
+              
+              {isOwner && (
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate(`/projects/${project.id}/edit`)}
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" disabled={deleting}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Project?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your project
+                          and all associated data.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
+                          Delete Project
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              )}
+            </div>
             
             <p className="text-muted-foreground text-lg mb-6">
               by <Link to={`/${handle}`} className="text-primary hover:underline">
