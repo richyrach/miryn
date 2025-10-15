@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase } from "lucide-react";
+import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase, Menu, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
@@ -12,12 +12,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export const Navbar = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [handle, setHandle] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -71,11 +73,12 @@ export const Navbar = () => {
     <nav className="fixed top-0 w-full z-50 glass-card border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <Link to="/" className="text-2xl font-bold text-primary">
+          <Link to="/" className="text-xl sm:text-2xl font-bold text-primary">
             Miryn
           </Link>
 
-          <div className="flex items-center gap-6">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
             <Link to="/explore" className="text-foreground hover:text-primary transition-colors">
               Explore
             </Link>
@@ -151,6 +154,107 @@ export const Navbar = () => {
                 </Link>
               </Button>
             )}
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="md:hidden flex items-center gap-2">
+            {user && (
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/messages">
+                  <MessageCircle className="w-5 h-5" />
+                </Link>
+              </Button>
+            )}
+            
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-64">
+                <div className="flex flex-col gap-4 mt-8">
+                  <Link 
+                    to="/explore" 
+                    className="text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Explore
+                  </Link>
+                  <Link 
+                    to="/people" 
+                    className="text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    People
+                  </Link>
+                  <Link 
+                    to="/services" 
+                    className="text-lg font-medium hover:text-primary transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Services
+                  </Link>
+
+                  {user ? (
+                    <>
+                      <div className="border-t pt-4">
+                        <Button variant="ghost" size="sm" asChild className="w-full justify-start">
+                          <Link to="/new" onClick={() => setMobileMenuOpen(false)}>
+                            <PlusCircle className="w-4 h-4 mr-2" />
+                            New Project
+                          </Link>
+                        </Button>
+                      </div>
+
+                      <div className="border-t pt-4">
+                        {handle && (
+                          <Button variant="ghost" size="sm" asChild className="w-full justify-start mb-2">
+                            <Link to={`/${handle}`} onClick={() => setMobileMenuOpen(false)}>
+                              <User className="w-4 h-4 mr-2" />
+                              View Profile
+                            </Link>
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="sm" asChild className="w-full justify-start mb-2">
+                          <Link to="/settings" onClick={() => setMobileMenuOpen(false)}>
+                            <Settings className="w-4 h-4 mr-2" />
+                            Settings
+                          </Link>
+                        </Button>
+                        {isAdmin && (
+                          <Button variant="ghost" size="sm" asChild className="w-full justify-start mb-2">
+                            <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                              <Shield className="w-4 h-4 mr-2" />
+                              Admin Panel
+                            </Link>
+                          </Button>
+                        )}
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => {
+                            handleSignOut();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full justify-start text-destructive"
+                        >
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Sign Out
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <Button asChild className="btn-hero w-full">
+                      <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                        <User className="w-4 h-4 mr-2" />
+                        Sign in
+                      </Link>
+                    </Button>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
