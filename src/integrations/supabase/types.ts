@@ -18,22 +18,31 @@ export type Database = {
         Row: {
           banned_at: string
           banned_by: string
+          expires_at: string | null
           id: string
           reason: string | null
+          unbanned_at: string | null
+          unbanned_by: string | null
           user_id: string
         }
         Insert: {
           banned_at?: string
           banned_by: string
+          expires_at?: string | null
           id?: string
           reason?: string | null
+          unbanned_at?: string | null
+          unbanned_by?: string | null
           user_id: string
         }
         Update: {
           banned_at?: string
           banned_by?: string
+          expires_at?: string | null
           id?: string
           reason?: string | null
+          unbanned_at?: string | null
+          unbanned_by?: string | null
           user_id?: string
         }
         Relationships: []
@@ -293,6 +302,184 @@ export type Database = {
           },
         ]
       }
+      service_requests: {
+        Row: {
+          budget: number | null
+          created_at: string | null
+          deadline: string | null
+          description: string
+          id: string
+          payment_method: string | null
+          payment_status: string | null
+          payment_tx_id: string | null
+          requester_id: string
+          requirements: Json | null
+          seller_profile_id: string
+          service_id: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          budget?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          description: string
+          id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          payment_tx_id?: string | null
+          requester_id: string
+          requirements?: Json | null
+          seller_profile_id: string
+          service_id: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          budget?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          description?: string
+          id?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          payment_tx_id?: string | null
+          requester_id?: string
+          requirements?: Json | null
+          seller_profile_id?: string
+          service_id?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_seller_profile_id_fkey"
+            columns: ["seller_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      services: {
+        Row: {
+          active: boolean | null
+          category: string
+          created_at: string | null
+          currency: string | null
+          delivery_time: number | null
+          description: string
+          features: Json | null
+          id: string
+          images: Json | null
+          price_amount: number | null
+          pricing_type: string
+          profile_id: string
+          requirements: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          category: string
+          created_at?: string | null
+          currency?: string | null
+          delivery_time?: number | null
+          description: string
+          features?: Json | null
+          id?: string
+          images?: Json | null
+          price_amount?: number | null
+          pricing_type: string
+          profile_id: string
+          requirements?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          category?: string
+          created_at?: string | null
+          currency?: string | null
+          delivery_time?: number | null
+          description?: string
+          features?: Json | null
+          id?: string
+          images?: Json | null
+          price_amount?: number | null
+          pricing_type?: string
+          profile_id?: string
+          requirements?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscriptions: {
+        Row: {
+          auto_renew: boolean | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          payment_method: string | null
+          started_at: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          started_at?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_renew?: boolean | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          payment_method?: string | null
+          started_at?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -314,6 +501,33 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      user_warnings: {
+        Row: {
+          created_at: string | null
+          id: string
+          reason: string
+          severity: string | null
+          user_id: string
+          warned_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reason: string
+          severity?: string | null
+          user_id: string
+          warned_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reason?: string
+          severity?: string | null
+          user_id?: string
+          warned_by?: string | null
         }
         Relationships: []
       }
@@ -353,6 +567,14 @@ export type Database = {
         Args: { target_project_id: string }
         Returns: number
       }
+      get_warning_count: {
+        Args: { target_user_id: string }
+        Returns: number
+      }
+      has_premium: {
+        Args: { target_user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -362,6 +584,12 @@ export type Database = {
       }
       is_admin: {
         Args: { _user_id: string }
+        Returns: boolean
+      }
+      is_ban_active: {
+        Args: {
+          ban_record: Database["public"]["Tables"]["banned_users"]["Row"]
+        }
         Returns: boolean
       }
       is_banned: {
@@ -375,6 +603,7 @@ export type Database = {
     }
     Enums: {
       app_role: "owner" | "admin" | "moderator" | "user"
+      subscription_tier: "free" | "premium_user" | "premium_seller"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -503,6 +732,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["owner", "admin", "moderator", "user"],
+      subscription_tier: ["free", "premium_user", "premium_seller"],
     },
   },
 } as const
