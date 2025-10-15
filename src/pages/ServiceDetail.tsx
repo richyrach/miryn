@@ -18,7 +18,8 @@ import {
   Briefcase,
   User,
   Pencil,
-  Trash2
+  Trash2,
+  Package
 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import {
@@ -265,6 +266,14 @@ const ServiceDetail = () => {
                       >
                         <Pencil className="w-4 h-4 mr-2" />
                         Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate(`/service-requests?service=${serviceId}`)}
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        View Requests
                       </Button>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>

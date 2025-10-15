@@ -21,6 +21,7 @@ export const Navbar = () => {
   const [handle, setHandle] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -47,12 +48,21 @@ export const Navbar = () => {
     // Get profile handle
     const { data: profile } = await supabase
       .from("profiles")
-      .select("handle")
+      .select("handle, id")
       .eq("user_id", userId)
       .single();
     
     if (profile) {
       setHandle(profile.handle);
+      
+      // Fetch pending request count
+      const { count } = await supabase
+        .from("service_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("seller_profile_id", profile.id)
+        .eq("status", "pending");
+      
+      setPendingCount(count || 0);
     }
 
     // Check admin status
@@ -92,8 +102,13 @@ export const Navbar = () => {
 
             {user && (
               <>
-                <Link to="/service-requests" className="text-foreground hover:text-primary transition-colors">
+                <Link to="/service-requests" className="text-foreground hover:text-primary transition-colors relative">
                   Requests
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-3 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {pendingCount}
+                    </span>
+                  )}
                 </Link>
                 <Link to="/messages" className="text-foreground hover:text-primary transition-colors">
                   <MessageCircle className="w-5 h-5" />
@@ -213,10 +228,15 @@ export const Navbar = () => {
                     <>
                       <Link 
                         to="/service-requests" 
-                        className="text-lg font-medium hover:text-primary transition-colors"
+                        className="text-lg font-medium hover:text-primary transition-colors relative inline-block"
                         onClick={() => setMobileMenuOpen(false)}
                       >
                         Requests
+                        {pendingCount > 0 && (
+                          <span className="absolute -top-1 -right-6 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {pendingCount}
+                          </span>
+                        )}
                       </Link>
                       
                       <div className="border-t pt-4 flex gap-2">
