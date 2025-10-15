@@ -92,6 +92,9 @@ export const Navbar = () => {
 
             {user && (
               <>
+                <Link to="/service-requests" className="text-foreground hover:text-primary transition-colors">
+                  Requests
+                </Link>
                 <Link to="/messages" className="text-foreground hover:text-primary transition-colors">
                   <MessageCircle className="w-5 h-5" />
                 </Link>
@@ -208,6 +211,14 @@ export const Navbar = () => {
 
                   {user ? (
                     <>
+                      <Link 
+                        to="/service-requests" 
+                        className="text-lg font-medium hover:text-primary transition-colors"
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        Requests
+                      </Link>
+                      
                       <div className="border-t pt-4 flex gap-2">
                         <Button variant="ghost" size="sm" asChild className="flex-1 justify-start">
                           <Link to="/messages" onClick={() => setMobileMenuOpen(false)}>

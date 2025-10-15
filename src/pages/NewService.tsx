@@ -36,6 +36,8 @@ const NewService = () => {
   const [deliveryTime, setDeliveryTime] = useState("");
   const [requirements, setRequirements] = useState("");
   const [features, setFeatures] = useState<string[]>([""]);
+  const [contactMethods, setContactMethods] = useState<string[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<string[]>([]);
 
   useEffect(() => {
     checkAuth();
@@ -128,6 +130,8 @@ const NewService = () => {
         delivery_time: deliveryTime ? parseInt(deliveryTime) : null,
         requirements: requirements.trim() || null,
         features: features.filter(f => f.trim()),
+        contact_methods: contactMethods.map(m => ({ type: m, required: true })),
+        accepted_payment_methods: paymentMethods.map(m => ({ method: m })),
         active: true,
       })
       .select()
@@ -354,6 +358,58 @@ const NewService = () => {
                   <Plus className="w-4 h-4 mr-2" />
                   Add Feature
                 </Button>
+              </div>
+            </Card>
+
+            <Card className="p-6 space-y-4">
+              <h2 className="text-xl font-bold">Contact Methods</h2>
+              <p className="text-sm text-muted-foreground">
+                How should clients contact you when they request this service?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {['Discord', 'WhatsApp', 'Instagram', 'Email', 'Telegram', 'Twitter'].map(method => (
+                  <label key={method} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={contactMethods.includes(method)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setContactMethods([...contactMethods, method]);
+                        } else {
+                          setContactMethods(contactMethods.filter(m => m !== method));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{method}</span>
+                  </label>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="p-6 space-y-4">
+              <h2 className="text-xl font-bold">Accepted Payment Methods</h2>
+              <p className="text-sm text-muted-foreground">
+                What payment methods do you accept?
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {['PayPal', 'Stripe/Card', 'Cryptocurrency', 'Bank Transfer', 'Cash', 'Other'].map(method => (
+                  <label key={method} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={paymentMethods.includes(method)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setPaymentMethods([...paymentMethods, method]);
+                        } else {
+                          setPaymentMethods(paymentMethods.filter(m => m !== method));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-sm">{method}</span>
+                  </label>
+                ))}
               </div>
             </Card>
 

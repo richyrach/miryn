@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCard } from "@/components/ProjectCard";
+import { ServiceCard } from "@/components/ServiceCard";
 import { RoleBadge } from "@/components/RoleBadge";
 import { FollowButton } from "@/components/FollowButton";
 import { MessageButton } from "@/components/MessageButton";
@@ -16,6 +17,7 @@ const Profile = () => {
   const { handle } = useParams();
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
@@ -240,6 +242,28 @@ const Profile = () => {
               </div>
             )}
           </div>
+
+          {/* Services */}
+          {services.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-3xl font-bold mb-6">Services</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((service) => (
+                  <ServiceCard
+                    key={service.id}
+                    id={service.id}
+                    title={service.title}
+                    category={service.category}
+                    pricing_type={service.pricing_type}
+                    price_amount={service.price_amount}
+                    currency={service.currency}
+                    delivery_time={service.delivery_time}
+                    description={service.description}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

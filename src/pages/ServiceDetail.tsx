@@ -46,6 +46,8 @@ interface Service {
   requirements: string | null;
   images: any;
   profile_id: string;
+  contact_methods?: any[];
+  accepted_payment_methods?: any[];
   public_profiles: {
     handle: string;
     display_name: string;
@@ -64,6 +66,9 @@ const ServiceDetail = () => {
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [selectedContactMethod, setSelectedContactMethod] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [isOwner, setIsOwner] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -154,6 +159,15 @@ const ServiceDetail = () => {
       return;
     }
 
+    if (!selectedContactMethod || !contactInfo.trim()) {
+      toast({
+        title: "Contact info required",
+        description: "Please select a contact method and provide your contact information",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setRequesting(true);
 
     const { error } = await supabase
@@ -165,6 +179,9 @@ const ServiceDetail = () => {
         description: description.trim(),
         budget: budget ? parseFloat(budget) : null,
         deadline: deadline || null,
+        selected_contact_method: selectedContactMethod,
+        contact_info: contactInfo.trim(),
+        selected_payment_method: selectedPaymentMethod || null,
         status: "pending"
       });
 
@@ -178,9 +195,9 @@ const ServiceDetail = () => {
     } else {
       toast({
         title: "Request sent!",
-        description: "The seller will review your request and get back to you.",
+        description: "The seller will review your request and contact you soon.",
       });
-      navigate("/messages");
+      navigate("/service-requests");
     }
 
     setRequesting(false);
@@ -384,6 +401,59 @@ const ServiceDetail = () => {
                         className="mt-1"
                       />
                     </div>
+
+                    {service.contact_methods && Array.isArray(service.contact_methods) && service.contact_methods.length > 0 && (
+                      <div>
+                        <Label htmlFor="contactMethod">How should they contact you?*</Label>
+                        <select
+                          id="contactMethod"
+                          value={selectedContactMethod}
+                          onChange={(e) => setSelectedContactMethod(e.target.value)}
+                          className="w-full mt-1 px-3 py-2 rounded-md border bg-background"
+                          required
+                        >
+                          <option value="">Select contact method</option>
+                          {service.contact_methods.map((cm: any, idx: number) => (
+                            <option key={idx} value={cm.type}>
+                              {cm.type}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {selectedContactMethod && (
+                      <div>
+                        <Label htmlFor="contactInfo">Your {selectedContactMethod}*</Label>
+                        <Input
+                          id="contactInfo"
+                          placeholder={`Enter your ${selectedContactMethod} username/info`}
+                          value={contactInfo}
+                          onChange={(e) => setContactInfo(e.target.value)}
+                          className="mt-1"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    {service.accepted_payment_methods && Array.isArray(service.accepted_payment_methods) && service.accepted_payment_methods.length > 0 && (
+                      <div>
+                        <Label htmlFor="paymentMethod">Preferred Payment Method</Label>
+                        <select
+                          id="paymentMethod"
+                          value={selectedPaymentMethod}
+                          onChange={(e) => setSelectedPaymentMethod(e.target.value)}
+                          className="w-full mt-1 px-3 py-2 rounded-md border bg-background"
+                        >
+                          <option value="">Select payment method</option>
+                          {service.accepted_payment_methods.map((pm: any, idx: number) => (
+                            <option key={idx} value={pm.method}>
+                              {pm.method}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
 
                     <div>
                       <Label htmlFor="budget">Budget (Optional)</Label>

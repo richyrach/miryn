@@ -460,6 +460,7 @@ export type Database = {
       service_requests: {
         Row: {
           budget: number | null
+          contact_info: string | null
           created_at: string | null
           deadline: string | null
           description: string
@@ -469,6 +470,8 @@ export type Database = {
           payment_tx_id: string | null
           requester_id: string
           requirements: Json | null
+          selected_contact_method: string | null
+          selected_payment_method: string | null
           seller_profile_id: string
           service_id: string
           status: string | null
@@ -476,6 +479,7 @@ export type Database = {
         }
         Insert: {
           budget?: number | null
+          contact_info?: string | null
           created_at?: string | null
           deadline?: string | null
           description: string
@@ -485,6 +489,8 @@ export type Database = {
           payment_tx_id?: string | null
           requester_id: string
           requirements?: Json | null
+          selected_contact_method?: string | null
+          selected_payment_method?: string | null
           seller_profile_id: string
           service_id: string
           status?: string | null
@@ -492,6 +498,7 @@ export type Database = {
         }
         Update: {
           budget?: number | null
+          contact_info?: string | null
           created_at?: string | null
           deadline?: string | null
           description?: string
@@ -501,6 +508,8 @@ export type Database = {
           payment_tx_id?: string | null
           requester_id?: string
           requirements?: Json | null
+          selected_contact_method?: string | null
+          selected_payment_method?: string | null
           seller_profile_id?: string
           service_id?: string
           status?: string | null
@@ -532,8 +541,10 @@ export type Database = {
       }
       services: {
         Row: {
+          accepted_payment_methods: Json | null
           active: boolean | null
           category: string
+          contact_methods: Json | null
           created_at: string | null
           currency: string | null
           delivery_time: number | null
@@ -549,8 +560,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          accepted_payment_methods?: Json | null
           active?: boolean | null
           category: string
+          contact_methods?: Json | null
           created_at?: string | null
           currency?: string | null
           delivery_time?: number | null
@@ -566,8 +579,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          accepted_payment_methods?: Json | null
           active?: boolean | null
           category?: string
+          contact_methods?: Json | null
           created_at?: string | null
           currency?: string | null
           delivery_time?: number | null

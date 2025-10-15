@@ -23,6 +23,8 @@ const NewProject = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [coverUrl, setCoverUrl] = useState('');
   const [profileId, setProfileId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,6 +52,46 @@ const NewProject = () => {
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .substring(0, 50);
+  };
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Error", description: "Image must be less than 5MB", variant: "destructive" });
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: "Error", description: "File must be an image", variant: "destructive" });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${crypto.randomUUID()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('banners')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('banners')
+        .getPublicUrl(filePath);
+
+      setCoverUrl(publicUrl);
+      toast({ title: "Success", description: "Cover image uploaded" });
+    } catch (error: any) {
+      console.error('Error uploading cover:', error);
+      toast({ title: "Error", description: "Failed to upload cover image", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,6 +142,7 @@ const NewProject = () => {
         summary: validationResult.data.summary || null,
         stack: validationResult.data.stack,
         ctas,
+        cover_url: coverUrl || null,
         published: true,
       });
 
@@ -141,6 +184,21 @@ const NewProject = () => {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Give your project a catchy name
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="cover">Cover Image (optional)</Label>
+                <Input 
+                  id="cover" 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleCoverUpload}
+                  disabled={uploading}
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {uploading ? "Uploading..." : coverUrl ? "✓ Image uploaded" : "Max 5MB, JPG/PNG/WEBP"}
                 </p>
               </div>
 
