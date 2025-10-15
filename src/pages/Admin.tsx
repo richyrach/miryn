@@ -456,7 +456,7 @@ const Admin = () => {
       .from("profiles")
       .select("user_id")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (!profile) {
       toast({
@@ -471,18 +471,53 @@ const Admin = () => {
       .from("user_roles")
       .insert([{
         user_id: profile.user_id,
-        role: role as 'owner' | 'admin' | 'moderator' | 'user',
+        role: role as any,
         created_by: session?.user.id
       }]);
 
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to assign role",
+        description: error.message || "Failed to assign role",
         variant: "destructive"
       });
     } else {
       toast({ title: `Role '${role}' assigned successfully` });
+      fetchUsers();
+    }
+  };
+
+  const handleRemoveRole = async (userId: string, role: string) => {
+    // Get actual user_id from profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!profile) {
+      toast({
+        title: "Error",
+        description: "User not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", profile.user_id)
+      .eq("role", role);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to remove role",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: `Role '${role}' removed successfully` });
       fetchUsers();
     }
   };
@@ -524,8 +559,9 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5 max-w-3xl">
+            <TabsList className="grid w-full grid-cols-6 max-w-4xl">
               <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="bans">Bans</TabsTrigger>
               <TabsTrigger value="warnings">Warnings</TabsTrigger>
               <TabsTrigger value="reports">Reports</TabsTrigger>
@@ -562,9 +598,22 @@ const Admin = () => {
                           <TableCell>@{user.handle}</TableCell>
                           <TableCell>{user.display_name}</TableCell>
                           <TableCell>
-                            <span className={user.role !== 'user' ? 'text-primary font-semibold' : ''}>
-                              {user.role}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className={user.role !== 'user' ? 'text-primary font-semibold' : ''}>
+                                {user.role}
+                              </span>
+                              {user.role !== 'user' && currentUserRole === 'owner' && canModerateUser(user.role) && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-6 px-2 text-xs"
+                                  onClick={() => handleRemoveRole(user.id, user.role)}
+                                  title="Remove role"
+                                >
+                                  <UserX className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             {user.warning_count > 0 && (
@@ -691,7 +740,7 @@ const Admin = () => {
                               {/* Assign Role */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline">
+                                  <Button size="sm" variant="outline" title="Assign Role">
                                     <Shield className="w-4 h-4" />
                                   </Button>
                                 </DialogTrigger>
@@ -716,11 +765,37 @@ const Admin = () => {
                                             <SelectValue placeholder="Select role" />
                                           </SelectTrigger>
                                           <SelectContent>
-                                            <SelectItem value="moderator">Moderator</SelectItem>
-                                            <SelectItem value="admin">Admin</SelectItem>
+                                            {currentUserRole === 'owner' && (
+                                              <>
+                                                <SelectItem value="admin">Admin</SelectItem>
+                                                <SelectItem value="moderator">Moderator</SelectItem>
+                                                <SelectItem value="content_mod">Content Moderator</SelectItem>
+                                                <SelectItem value="junior_mod">Junior Moderator</SelectItem>
+                                                <SelectItem value="support">Support</SelectItem>
+                                              </>
+                                            )}
+                                            {currentUserRole === 'admin' && (
+                                              <>
+                                                <SelectItem value="moderator">Moderator</SelectItem>
+                                                <SelectItem value="content_mod">Content Moderator</SelectItem>
+                                                <SelectItem value="junior_mod">Junior Moderator</SelectItem>
+                                                <SelectItem value="support">Support</SelectItem>
+                                              </>
+                                            )}
+                                            {currentUserRole === 'moderator' && (
+                                              <>
+                                                <SelectItem value="junior_mod">Junior Moderator</SelectItem>
+                                                <SelectItem value="support">Support</SelectItem>
+                                              </>
+                                            )}
                                           </SelectContent>
                                         </Select>
                                       </div>
+                                      <p className="text-sm text-muted-foreground mt-2">
+                                        {currentUserRole === 'owner' ? 'As owner, you can assign any role' : 
+                                         currentUserRole === 'admin' ? 'As admin, you can assign moderator roles' :
+                                         'You can assign support roles'}
+                                      </p>
                                     </div>
                                     <DialogFooter>
                                       <Button type="submit">

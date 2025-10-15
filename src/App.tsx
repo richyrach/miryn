@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { BanGuard } from "@/components/BanGuard";
+import { WarningGuard } from "@/components/WarningGuard";
 import { ConsentManager } from "@/components/ConsentManager";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
@@ -23,6 +24,8 @@ import ServiceDetail from "./pages/ServiceDetail";
 import NewService from "./pages/NewService";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
+import Warning from "./pages/Warning";
+import Banned from "./pages/Banned";
 
 const queryClient = new QueryClient();
 
@@ -33,28 +36,33 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <BanGuard>
-          <ConsentManager />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Auth />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/explore" element={<Explore />} />
-            <Route path="/people" element={<People />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/new" element={<NewProject />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/messages" element={<Messages />} />
-            <Route path="/services" element={<Services />} />
-            <Route path="/services/new" element={<NewService />} />
-            <Route path="/services/:serviceId" element={<ServiceDetail />} />
-            <Route path="/:handle" element={<Profile />} />
-            <Route path="/:handle/:projectSlug" element={<Project />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <WarningGuard>
+            <ConsentManager />
+            <Routes>
+              <Route path="/banned" element={<Banned />} />
+              <Route path="/warning" element={<Warning />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Auth />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/people" element={<People />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/new" element={<NewProject />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/messages" element={<Messages />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/services/new" element={<NewService />} />
+              <Route path="/services/:serviceId" element={<ServiceDetail />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/:handle" element={<Profile />} />
+              <Route path="/:handle/:projectSlug" element={<Project />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </WarningGuard>
         </BanGuard>
       </BrowserRouter>
     </TooltipProvider>
