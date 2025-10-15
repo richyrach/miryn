@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProjectCard } from "@/components/ProjectCard";
 import { RoleBadge } from "@/components/RoleBadge";
+import { FollowButton } from "@/components/FollowButton";
+import { MessageButton } from "@/components/MessageButton";
 import { User, MapPin, ExternalLink } from "lucide-react";
 
 const Profile = () => {
@@ -13,6 +15,8 @@ const Profile = () => {
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
   useEffect(() => {
     if (handle) {
@@ -40,6 +44,29 @@ const Profile = () => {
         .order("created_at", { ascending: false });
 
       setProjects(projectsData || []);
+
+      // Get user_id for follow counts
+      const { data: profileWithUserId } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .eq("id", profileData.id)
+        .single();
+
+      if (profileWithUserId) {
+        // Get follower count
+        const { data: followers } = await supabase
+          .from("follows")
+          .select("id")
+          .eq("following_id", profileWithUserId.user_id);
+        setFollowerCount(followers?.length || 0);
+
+        // Get following count
+        const { data: following } = await supabase
+          .from("follows")
+          .select("id")
+          .eq("follower_id", profileWithUserId.user_id);
+        setFollowingCount(following?.length || 0);
+      }
     }
     
     setLoading(false);
@@ -112,7 +139,21 @@ const Profile = () => {
                     )}
                   </div>
                 
-                <p className="text-lg text-muted-foreground mb-4">@{profile.handle}</p>
+                <p className="text-lg text-muted-foreground mb-2">@{profile.handle}</p>
+                
+                <div className="flex items-center gap-4 mb-4">
+                  <span className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">{followerCount}</strong> Followers
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    <strong className="text-foreground">{followingCount}</strong> Following
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <FollowButton targetUserId={profile.id} targetHandle={profile.handle} />
+                  <MessageButton targetUserId={profile.id} targetHandle={profile.handle} />
+                </div>
                 
                 {profile.location && (
                   <p className="flex items-center gap-2 text-muted-foreground mb-4">

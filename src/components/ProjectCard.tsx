@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Badge } from "./ui/badge";
+import { ProjectLikeButton } from "./ProjectLikeButton";
 
 interface ProjectCardProps {
   id: string;
@@ -12,6 +13,7 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({
+  id,
   title,
   slug,
   summary,
@@ -56,7 +58,12 @@ export const ProjectCard = ({
               </Badge>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">by @{ownerHandle}</p>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">by @{ownerHandle}</p>
+            <div onClick={(e) => e.preventDefault()}>
+              <ProjectLikeButton projectId={id} />
+            </div>
+          </div>
         </div>
       </div>
     </Link>

@@ -15,6 +15,7 @@ import NewProject from "./pages/NewProject";
 import Profile from "./pages/Profile";
 import Project from "./pages/Project";
 import Admin from "./pages/Admin";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/new" element={<NewProject />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/:handle" element={<Profile />} />
           <Route path="/:handle/:projectSlug" element={<Project />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
