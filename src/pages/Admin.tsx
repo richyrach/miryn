@@ -508,7 +508,7 @@ const Admin = () => {
       .from("user_roles")
       .delete()
       .eq("user_id", profile.user_id)
-      .eq("role", role);
+      .eq("role", role as any);
 
     if (error) {
       toast({
