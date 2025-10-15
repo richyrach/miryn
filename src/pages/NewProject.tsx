@@ -7,6 +7,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
+import { z } from "zod";
+
+const projectSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(100, "Title must be less than 100 characters"),
+  slug: z.string().trim().min(1, "Slug is required").max(50, "Slug must be less than 50 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
+  summary: z.string().trim().max(500, "Summary must be less than 500 characters").optional(),
+  stack: z.array(z.string().trim().max(30, "Each technology must be less than 30 characters")).max(20, "Maximum 20 technologies allowed"),
+  ctaLabel: z.string().trim().max(50, "CTA label must be less than 50 characters").optional(),
+  ctaUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
 
 const NewProject = () => {
   const navigate = useNavigate();
@@ -49,11 +59,34 @@ const NewProject = () => {
     const formData = new FormData(e.currentTarget);
     
     const title = formData.get("title") as string;
-    const slug = (formData.get("slug") as string) || generateSlug(title);
+    const slugInput = formData.get("slug") as string;
+    const slug = slugInput || generateSlug(title);
     const summary = formData.get("summary") as string;
     const stackInput = formData.get("stack") as string;
+    const stack = stackInput ? stackInput.split(",").map((s) => s.trim()).filter(Boolean) : [];
     const ctaLabel = formData.get("ctaLabel") as string;
     const ctaUrl = formData.get("ctaUrl") as string;
+
+    // Validate input
+    const validationResult = projectSchema.safeParse({
+      title,
+      slug,
+      summary: summary || undefined,
+      stack,
+      ctaLabel: ctaLabel || undefined,
+      ctaUrl: ctaUrl || undefined,
+    });
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(", ");
+      toast({
+        title: "Validation Error",
+        description: errors,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
 
     const ctas = ctaLabel && ctaUrl ? [{ label: ctaLabel, url: ctaUrl }] : [];
 
@@ -61,16 +94,16 @@ const NewProject = () => {
       .from("projects")
       .insert({
         owner_id: profileId,
-        title,
-        slug,
-        summary: summary || null,
-        stack: stackInput ? stackInput.split(",").map(s => s.trim()) : [],
+        title: validationResult.data.title,
+        slug: validationResult.data.slug,
+        summary: validationResult.data.summary || null,
+        stack: validationResult.data.stack,
         ctas,
         published: true,
       });
 
     if (error) {
-      toast({ title: "Error creating project", description: error.message, variant: "destructive" });
+      toast({ title: "Error creating project", description: "Unable to create project. Please try again.", variant: "destructive" });
     } else {
       toast({ title: "Project created successfully!" });
       navigate("/explore");

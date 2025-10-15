@@ -9,7 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
+import { z } from "zod";
 import { Check } from "lucide-react";
+
+const profileSchema = z.object({
+  display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
+  bio: z.string().trim().max(500, "Bio must be less than 500 characters").optional(),
+  location: z.string().trim().max(100, "Location must be less than 100 characters").optional(),
+  skills: z.array(z.string().trim().max(50, "Each skill must be less than 50 characters")).max(20, "Maximum 20 skills allowed"),
+  intro_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  primary_cta_url: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+});
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -50,24 +60,54 @@ const Settings = () => {
     setSaved(false);
     
     const formData = new FormData(e.currentTarget);
+    
+    const displayName = formData.get("displayName") as string;
+    const bio = formData.get("bio") as string;
+    const location = formData.get("location") as string;
     const skillsInput = formData.get("skills") as string;
+    const skills = skillsInput ? skillsInput.split(",").map((s) => s.trim()).filter(Boolean) : [];
+    const introUrl = formData.get("introUrl") as string;
+    const primaryCta = formData.get("primaryCta") as string;
+    const primaryCtaUrl = formData.get("primaryCtaUrl") as string;
+    const hireable = formData.get("hireable") === "on";
+
+    // Validate input
+    const validationResult = profileSchema.safeParse({
+      display_name: displayName,
+      bio: bio || undefined,
+      location: location || undefined,
+      skills,
+      intro_url: introUrl || undefined,
+      primary_cta_url: primaryCtaUrl || undefined,
+    });
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`).join(", ");
+      toast({ 
+        title: "Validation Error", 
+        description: errors, 
+        variant: "destructive" 
+      });
+      setLoading(false);
+      return;
+    }
     
     const { error } = await supabase
       .from("profiles")
       .update({
-        display_name: formData.get("displayName") as string,
-        bio: (formData.get("bio") as string) || null,
-        location: (formData.get("location") as string) || null,
-        skills: skillsInput ? skillsInput.split(",").map(s => s.trim()) : [],
-        intro_url: (formData.get("introUrl") as string) || null,
-        primary_cta: (formData.get("primaryCta") as string) || null,
-        primary_cta_url: (formData.get("primaryCtaUrl") as string) || null,
-        hireable: formData.get("hireable") === "on",
+        display_name: validationResult.data.display_name,
+        bio: validationResult.data.bio || null,
+        location: validationResult.data.location || null,
+        skills: validationResult.data.skills,
+        intro_url: validationResult.data.intro_url || null,
+        primary_cta: primaryCta || null,
+        primary_cta_url: validationResult.data.primary_cta_url || null,
+        hireable,
       })
       .eq("user_id", userId);
 
     if (error) {
-      toast({ title: "Error updating profile", description: error.message, variant: "destructive" });
+      toast({ title: "Error updating profile", description: "Unable to update profile. Please try again.", variant: "destructive" });
     } else {
       setSaved(true);
       toast({ title: "Profile updated successfully!" });
