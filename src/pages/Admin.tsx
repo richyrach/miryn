@@ -641,7 +641,7 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+            <TabsList className="grid w-full grid-cols-9 max-w-6xl">
               <TabsTrigger value="users">Users</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="bans">Bans</TabsTrigger>
@@ -652,6 +652,8 @@ const Admin = () => {
                 <Megaphone className="w-4 h-4 mr-2" />
                 Announcements
               </TabsTrigger>
+              <TabsTrigger value="reviews">Reviews</TabsTrigger>
+              <TabsTrigger value="comments">Comments</TabsTrigger>
             </TabsList>
  
             {/* Users Tab */}
@@ -1370,6 +1372,22 @@ const Admin = () => {
                     ))}
                   </div>
                 )}
+              </div>
+            </TabsContent>
+
+            {/* Reviews Tab */}
+            <TabsContent value="reviews">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Service Reviews</h2>
+                <p className="text-muted-foreground">Reviews management - view all reviews from ServiceDetail pages</p>
+              </div>
+            </TabsContent>
+
+            {/* Comments Tab */}
+            <TabsContent value="comments">
+              <div className="glass-card rounded-2xl p-4 sm:p-6">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4">Project Comments</h2>
+                <p className="text-muted-foreground">Comments management - view and moderate from Project pages</p>
               </div>
             </TabsContent>
           </Tabs>

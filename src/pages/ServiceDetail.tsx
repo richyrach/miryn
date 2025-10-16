@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,19 @@ import {
   User,
   Pencil,
   Trash2,
-  Package
+  Package,
+  Star
 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
+import { ServiceReviewForm } from "@/components/ServiceReviewForm";
+import { ServiceReviewCard } from "@/components/ServiceReviewCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -60,6 +70,7 @@ interface Service {
 
 const ServiceDetail = () => {
   const { serviceId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [service, setService] = useState<Service | null>(null);
@@ -72,13 +83,99 @@ const ServiceDetail = () => {
   const [contactInfo, setContactInfo] = useState("");
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState("");
   const [isOwner, setIsOwner] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [avgRating, setAvgRating] = useState(0);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
+  const [reviewRequest, setReviewRequest] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (serviceId) {
       fetchService();
+      fetchReviews();
+      checkReviewRequest();
+      checkAdminStatus();
     }
   }, [serviceId]);
+
+  const checkAdminStatus = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: roles } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", session.user.id);
+
+    const hasAdminRole = roles?.some(r => ['owner', 'admin', 'moderator'].includes(r.role));
+    setIsAdmin(hasAdminRole || false);
+  };
+
+  const fetchReviews = async () => {
+    const { data, error } = await supabase
+      .from("service_reviews")
+      .select(`
+        id,
+        rating,
+        comment,
+        created_at,
+        profiles!service_reviews_reviewer_id_fkey (
+          display_name,
+          handle,
+          avatar_url
+        )
+      `)
+      .eq("service_id", serviceId)
+      .order("created_at", { ascending: false });
+
+    if (!error && data) {
+      setReviews(data as any);
+      if (data.length > 0) {
+        const avg = data.reduce((sum, r) => sum + r.rating, 0) / data.length;
+        setAvgRating(Math.round(avg * 10) / 10);
+      }
+    }
+  };
+
+  const checkReviewRequest = async () => {
+    const reviewId = searchParams.get('review');
+    if (!reviewId) return;
+
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+
+    const { data: request } = await supabase
+      .from("service_requests")
+      .select("*, services(profiles(id))")
+      .eq("id", reviewId)
+      .eq("requester_id", session.user.id)
+      .eq("status", "completed")
+      .maybeSingle();
+
+    if (request) {
+      setReviewRequest(request);
+      setShowReviewDialog(true);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId: string) => {
+    const { error } = await supabase
+      .from("service_reviews")
+      .delete()
+      .eq("id", reviewId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete review",
+        variant: "destructive",
+      });
+    } else {
+      toast({ title: "Review deleted" });
+      fetchReviews();
+    }
+  };
 
   const fetchService = async () => {
     setLoading(true);
@@ -372,6 +469,51 @@ const ServiceDetail = () => {
                   </p>
                 </Card>
               )}
+
+              {/* Reviews */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold">Reviews</h2>
+                    {reviews.length > 0 && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${
+                                star <= avgRating
+                                  ? "fill-yellow-400 text-yellow-400"
+                                  : "text-muted-foreground"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {avgRating} ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {reviews.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">
+                    No reviews yet. Be the first to review this service!
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <ServiceReviewCard
+                        key={review.id}
+                        review={review}
+                        isAdmin={isAdmin}
+                        onDelete={handleDeleteReview}
+                      />
+                    ))}
+                  </div>
+                )}
+              </Card>
             </div>
 
             {/* Sidebar - Order Form */}
@@ -511,6 +653,26 @@ const ServiceDetail = () => {
           </div>
         </div>
       </main>
+
+      {/* Review Dialog */}
+      <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rate this Service</DialogTitle>
+          </DialogHeader>
+          {reviewRequest && service && (
+            <ServiceReviewForm
+              serviceId={service.id}
+              serviceRequestId={reviewRequest.id}
+              sellerProfileId={service.profile_id}
+              onSuccess={() => {
+                setShowReviewDialog(false);
+                fetchReviews();
+              }}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

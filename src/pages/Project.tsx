@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
+import { ProjectCommentSection } from "@/components/ProjectCommentSection";
 import { useToast } from "@/hooks/use-toast";
 import {
   AlertDialog,
@@ -237,6 +238,11 @@ const Project = () => {
              {/* Report */}
              <div className="pt-6">
                <ReportButton targetType="project" targetId={project.id} />
+             </div>
+
+             {/* Comments Section */}
+             <div className="pt-8 border-t">
+               <ProjectCommentSection projectId={project.id} isAdmin={isOwner} />
              </div>
            </div>
         </div>

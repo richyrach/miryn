@@ -349,6 +349,14 @@ const ServiceRequests = () => {
           </Select>
         </div>
       )}
+      
+      {!isIncoming && request.status === "completed" && (
+        <Link to={`/services/${request.service_id}?review=${request.id}`} className="mt-2">
+          <Button variant="outline" size="sm">
+            Rate this Service
+          </Button>
+        </Link>
+      )}
     </Card>
   );
 

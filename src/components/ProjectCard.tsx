@@ -60,7 +60,7 @@ export const ProjectCard = ({
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-muted-foreground">by @{ownerHandle}</p>
-            <div onClick={(e) => e.preventDefault()}>
+            <div onClick={(e) => e.preventDefault()} className="flex items-center gap-2">
               <ProjectLikeButton projectId={id} />
             </div>
           </div>
