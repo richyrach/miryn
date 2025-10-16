@@ -30,6 +30,7 @@ const Project = () => {
   const [loading, setLoading] = useState(true);
   const [isOwner, setIsOwner] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const { isAdmin: isAdminUser } = useAdminCheck();
 
   useEffect(() => {
     if (handle && projectSlug) {
@@ -243,7 +244,7 @@ const Project = () => {
 
              {/* Comments Section */}
              <div className="pt-8 border-t">
-               <ProjectCommentSection projectId={project.id} isAdmin={isAdmin} />
+               <ProjectCommentSection projectId={project.id} isAdmin={isAdminUser} />
              </div>
            </div>
         </div>

@@ -100,7 +100,7 @@ export const ConversationList = ({ onSelectConversation, selectedConversationId 
               .eq("conversation_id", conv.id)
               .neq("sender_id", user.id)
               .is("deleted_at", null)
-              .gt("created_at", participants?.last_read_at || conv.created_at);
+              .gt("created_at", (participants as any)?.last_read_at || conv.created_at);
 
             return {
               ...conv,

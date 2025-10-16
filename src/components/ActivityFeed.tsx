@@ -48,8 +48,8 @@ export const ActivityFeed = () => {
 
   const fetchActivities = async () => {
     try {
-      let query = supabase
-        .from("activities")
+      const query = supabase
+        .from("activities" as any)
         .select(`
           *,
           profiles:user_id (
@@ -62,11 +62,9 @@ export const ActivityFeed = () => {
         .limit(20);
 
       // If user follows people, show their activities, otherwise show global feed
-      if (following.length > 0) {
-        query = query.in("user_id", following);
-      }
-
-      const { data } = await query;
+      const { data } = following.length > 0
+        ? await query.in("user_id", following)
+        : await query;
 
       if (data) {
         setActivities(data as any);

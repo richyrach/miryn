@@ -29,12 +29,12 @@ export const BookmarkButton = ({
     if (!user) return;
 
     const { data } = await supabase
-      .from("bookmarks")
+      .from("bookmarks" as any)
       .select("id")
       .eq("user_id", user.id)
       .eq("target_type", targetType)
       .eq("target_id", targetId)
-      .single();
+      .maybeSingle();
 
     setIsBookmarked(!!data);
   };
@@ -54,7 +54,7 @@ export const BookmarkButton = ({
     try {
       if (isBookmarked) {
         const { error } = await supabase
-          .from("bookmarks")
+          .from("bookmarks" as any)
           .delete()
           .eq("user_id", user.id)
           .eq("target_type", targetType)
@@ -64,7 +64,7 @@ export const BookmarkButton = ({
         setIsBookmarked(false);
         toast({ title: "Removed from bookmarks" });
       } else {
-        const { error } = await supabase.from("bookmarks").insert({
+        const { error } = await supabase.from("bookmarks" as any).insert({
           user_id: user.id,
           target_type: targetType,
           target_id: targetId,

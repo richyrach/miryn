@@ -24,16 +24,16 @@ const Bookmarks = () => {
       if (!user) return;
 
       const { data: bookmarksData } = await supabase
-        .from("bookmarks")
+        .from("bookmarks" as any)
         .select("*")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (bookmarksData) {
         // Fetch projects
-        const projectIds = bookmarksData
-          .filter(b => b.target_type === "project")
-          .map(b => b.target_id);
+        const projectIds = (bookmarksData as any[])
+          .filter((b: any) => b.target_type === "project")
+          .map((b: any) => b.target_id);
         
         if (projectIds.length > 0) {
           const { data: projectsData } = await supabase
@@ -51,9 +51,9 @@ const Bookmarks = () => {
         }
 
         // Fetch services
-        const serviceIds = bookmarksData
-          .filter(b => b.target_type === "service")
-          .map(b => b.target_id);
+        const serviceIds = (bookmarksData as any[])
+          .filter((b: any) => b.target_type === "service")
+          .map((b: any) => b.target_id);
         
         if (serviceIds.length > 0) {
           const { data: servicesData } = await supabase
@@ -71,9 +71,9 @@ const Bookmarks = () => {
         }
 
         // Fetch profiles
-        const profileIds = bookmarksData
-          .filter(b => b.target_type === "profile")
-          .map(b => b.target_id);
+        const profileIds = (bookmarksData as any[])
+          .filter((b: any) => b.target_type === "profile")
+          .map((b: any) => b.target_id);
         
         if (profileIds.length > 0) {
           const { data: profilesData } = await supabase
@@ -132,7 +132,7 @@ const Bookmarks = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {projects.map((project: any) => (
-                      <ProjectCard key={project.id} project={project} />
+                      <ProjectCard key={project.id} {...project} />
                     ))}
                   </div>
                 )}
@@ -146,7 +146,7 @@ const Bookmarks = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {services.map((service: any) => (
-                      <ServiceCard key={service.id} service={service} />
+                      <ServiceCard key={service.id} {...service} />
                     ))}
                   </div>
                 )}
@@ -160,7 +160,7 @@ const Bookmarks = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {profiles.map((profile: any) => (
-                      <ProfileCard key={profile.id} profile={profile} />
+                      <ProfileCard key={profile.id} {...profile} />
                     ))}
                   </div>
                 )}

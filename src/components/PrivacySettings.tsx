@@ -29,12 +29,12 @@ export const PrivacySettings = () => {
 
       const { data } = await supabase
         .from("profiles")
-        .select("privacy_settings")
+        .select("privacy_settings" as any)
         .eq("user_id", user.id)
-        .single();
+        .maybeSingle();
 
-      if (data?.privacy_settings) {
-        setSettings(data.privacy_settings as any);
+      if ((data as any)?.privacy_settings) {
+        setSettings((data as any).privacy_settings);
       }
     } catch (error) {
       console.error("Error fetching privacy settings:", error);
@@ -51,7 +51,7 @@ export const PrivacySettings = () => {
 
       const { error } = await supabase
         .from("profiles")
-        .update({ privacy_settings: settings })
+        .update({ privacy_settings: settings } as any)
         .eq("user_id", user.id);
 
       if (error) throw error;
