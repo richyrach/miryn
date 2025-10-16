@@ -1,5 +1,5 @@
 import { Badge } from "./ui/badge";
-import { Shield, Star, Crown, FileCheck, AlertCircle, HeadphonesIcon } from "lucide-react";
+import { Shield, Star, Crown, FileCheck, AlertCircle, HeadphonesIcon, Handshake, BadgeCheck, Code, Heart, Sparkles } from "lucide-react";
 
 interface RoleBadgeProps {
   role: string;
@@ -31,6 +31,41 @@ export const RoleBadge = ({ role }: RoleBadgeProps) => {
           className: 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white border-0',
           description: 'Can warn & moderate content'
         };
+      case 'partner':
+        return {
+          label: 'Partner',
+          icon: Handshake,
+          className: 'bg-gradient-to-r from-purple-500 to-violet-600 text-white border-0',
+          description: 'Official platform partner'
+        };
+      case 'verified':
+        return {
+          label: 'Verified',
+          icon: BadgeCheck,
+          className: 'bg-gradient-to-r from-sky-500 to-blue-600 text-white border-0',
+          description: 'Verified user'
+        };
+      case 'developer':
+        return {
+          label: 'Developer',
+          icon: Code,
+          className: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0',
+          description: 'Platform developer'
+        };
+      case 'early_supporter':
+        return {
+          label: 'Early Supporter',
+          icon: Heart,
+          className: 'bg-gradient-to-r from-pink-500 to-rose-600 text-white border-0',
+          description: 'Early supporter of the platform'
+        };
+      case 'vip':
+        return {
+          label: 'VIP',
+          icon: Sparkles,
+          className: 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white border-0',
+          description: 'VIP member'
+        };
       case 'content_mod':
         return {
           label: 'Content Mod',
@@ -42,14 +77,14 @@ export const RoleBadge = ({ role }: RoleBadgeProps) => {
         return {
           label: 'Junior Mod',
           icon: AlertCircle,
-          className: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white border-0',
+          className: 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-0',
           description: 'Can issue warnings'
         };
       case 'support':
         return {
           label: 'Support',
           icon: HeadphonesIcon,
-          className: 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-0',
+          className: 'bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white border-0',
           description: 'Can view reports & help users'
         };
       default:

@@ -79,5 +79,5 @@ export const useWarningCheck = () => {
     }
   };
 
-  return { ...warningInfo, acknowledgeWarning };
+  return { ...warningInfo, acknowledgeWarning, recheckWarningStatus: checkWarningStatus };
 };

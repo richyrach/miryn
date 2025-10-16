@@ -66,5 +66,5 @@ export const useBanCheck = () => {
     }
   };
 
-  return banInfo;
+  return { ...banInfo, recheckBanStatus: checkBanStatus };
 };

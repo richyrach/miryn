@@ -732,6 +732,10 @@ export type Database = {
         Args: { moderator_id: string; target_id: string }
         Returns: boolean
       }
+      delete_user_account: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
       get_follower_count: {
         Args: { target_user_id: string }
         Returns: number
@@ -791,6 +795,11 @@ export type Database = {
         | "support"
         | "content_mod"
         | "junior_mod"
+        | "partner"
+        | "verified"
+        | "developer"
+        | "early_supporter"
+        | "vip"
       feedback_status: "open" | "in_progress" | "resolved" | "dismissed"
       feedback_type: "bug" | "suggestion"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
@@ -931,6 +940,11 @@ export const Constants = {
         "support",
         "content_mod",
         "junior_mod",
+        "partner",
+        "verified",
+        "developer",
+        "early_supporter",
+        "vip",
       ],
       feedback_status: ["open", "in_progress", "resolved", "dismissed"],
       feedback_type: ["bug", "suggestion"],

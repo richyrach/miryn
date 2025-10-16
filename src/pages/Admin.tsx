@@ -6,7 +6,7 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
-import { Shield, UserX, UserCheck, AlertTriangle, Ban, Clock, Megaphone } from "lucide-react";
+import { Shield, UserX, UserCheck, AlertTriangle, Ban, Clock, Megaphone, Trash2, AlertCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -326,6 +326,54 @@ const Admin = () => {
       .eq("id", serviceId);
     if (!error) {
       toast({ title: "Service deactivated" });
+    }
+  };
+
+  const adminDeleteService = async (serviceId: string) => {
+    const { error } = await supabase
+      .from("services")
+      .delete()
+      .eq("id", serviceId);
+    if (!error) {
+      toast({ title: "Service permanently deleted" });
+    }
+  };
+
+  const handleDeleteFeedback = async (feedbackId: string) => {
+    const { error } = await supabase
+      .from("feedback")
+      .delete()
+      .eq("id", feedbackId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete feedback",
+        variant: "destructive"
+      });
+    } else {
+      toast({ title: "Feedback deleted successfully" });
+      fetchFeedback();
+    }
+  };
+
+  const handleDeleteUser = async (userId: string, handle: string) => {
+    const { error } = await supabase.rpc('delete_user_account', {
+      target_user_id: userId
+    });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete user account",
+        variant: "destructive"
+      });
+    } else {
+      toast({ 
+        title: "Success",
+        description: `User @${handle} and all their data has been permanently deleted`
+      });
+      fetchUsers();
     }
   };
 
@@ -807,11 +855,16 @@ const Admin = () => {
                                           <SelectTrigger className="mt-1">
                                             <SelectValue placeholder="Select role" />
                                           </SelectTrigger>
-                                          <SelectContent>
+                                           <SelectContent>
                                             {currentUserRole === 'owner' && (
                                               <>
                                                 <SelectItem value="admin">Admin</SelectItem>
                                                 <SelectItem value="moderator">Moderator</SelectItem>
+                                                <SelectItem value="partner">Partner</SelectItem>
+                                                <SelectItem value="verified">Verified</SelectItem>
+                                                <SelectItem value="developer">Developer</SelectItem>
+                                                <SelectItem value="early_supporter">Early Supporter</SelectItem>
+                                                <SelectItem value="vip">VIP</SelectItem>
                                                 <SelectItem value="content_mod">Content Moderator</SelectItem>
                                                 <SelectItem value="junior_mod">Junior Moderator</SelectItem>
                                                 <SelectItem value="support">Support</SelectItem>
@@ -820,6 +873,11 @@ const Admin = () => {
                                             {currentUserRole === 'admin' && (
                                               <>
                                                 <SelectItem value="moderator">Moderator</SelectItem>
+                                                <SelectItem value="partner">Partner</SelectItem>
+                                                <SelectItem value="verified">Verified</SelectItem>
+                                                <SelectItem value="developer">Developer</SelectItem>
+                                                <SelectItem value="early_supporter">Early Supporter</SelectItem>
+                                                <SelectItem value="vip">VIP</SelectItem>
                                                 <SelectItem value="content_mod">Content Moderator</SelectItem>
                                                 <SelectItem value="junior_mod">Junior Moderator</SelectItem>
                                                 <SelectItem value="support">Support</SelectItem>
@@ -827,6 +885,7 @@ const Admin = () => {
                                             )}
                                             {currentUserRole === 'moderator' && (
                                               <>
+                                                <SelectItem value="verified">Verified</SelectItem>
                                                 <SelectItem value="junior_mod">Junior Moderator</SelectItem>
                                                 <SelectItem value="support">Support</SelectItem>
                                               </>
@@ -843,6 +902,75 @@ const Admin = () => {
                                     <DialogFooter>
                                       <Button type="submit">
                                         Assign Role
+                                      </Button>
+                                    </DialogFooter>
+                                   </form>
+                                </DialogContent>
+                              </Dialog>
+
+                              {/* Delete User Account */}
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive" 
+                                    disabled={!canModerateUser(user.roles)}
+                                    title="Delete Account"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle className="flex items-center gap-2 text-destructive">
+                                      <AlertCircle className="w-5 h-5" />
+                                      Permanently Delete User Account
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                      This action cannot be undone. This will permanently delete @{user.handle}'s account and all associated data including:
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="bg-destructive/10 border border-destructive/30 rounded-lg p-4 my-4">
+                                    <ul className="text-sm space-y-1 text-muted-foreground">
+                                      <li>• Profile and personal information</li>
+                                      <li>• All projects and services</li>
+                                      <li>• Messages and conversations</li>
+                                      <li>• Follows and reactions</li>
+                                      <li>• Warnings and moderation history</li>
+                                    </ul>
+                                  </div>
+                                  <form onSubmit={(e) => {
+                                    e.preventDefault();
+                                    const formData = new FormData(e.currentTarget);
+                                    const confirmation = formData.get("confirmation") as string;
+                                    if (confirmation === user.handle) {
+                                      handleDeleteUser(user.user_id, user.handle);
+                                    } else {
+                                      toast({
+                                        title: "Error",
+                                        description: "Username does not match. Please type the exact username to confirm.",
+                                        variant: "destructive"
+                                      });
+                                    }
+                                  }}>
+                                    <div className="space-y-4 py-4">
+                                      <div>
+                                        <Label htmlFor="confirmation">
+                                          Type <span className="font-mono font-bold">{user.handle}</span> to confirm
+                                        </Label>
+                                        <Input
+                                          id="confirmation"
+                                          name="confirmation"
+                                          placeholder={user.handle}
+                                          required
+                                          className="mt-1"
+                                        />
+                                      </div>
+                                    </div>
+                                    <DialogFooter>
+                                      <Button type="submit" variant="destructive">
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete Account Permanently
                                       </Button>
                                     </DialogFooter>
                                   </form>
@@ -1026,16 +1154,30 @@ const Admin = () => {
                                   </Button>
                                 )}
                                 {report.target_type === 'service' && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => {
-                                      adminDeactivateService(report.target_id);
-                                      updateReportStatus(report.id, "resolved");
-                                    }}
-                                  >
-                                    Deactivate
-                                  </Button>
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        adminDeactivateService(report.target_id);
+                                        updateReportStatus(report.id, "resolved");
+                                      }}
+                                    >
+                                      Deactivate
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => {
+                                        if (confirm("Permanently delete this service? This cannot be undone!")) {
+                                          adminDeleteService(report.target_id);
+                                          updateReportStatus(report.id, "resolved");
+                                        }
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                  </>
                                 )}
                               </div>
                             </TableCell>
@@ -1097,41 +1239,54 @@ const Admin = () => {
                               {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
                             </TableCell>
                             <TableCell>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button size="sm" variant="outline">View</Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-2xl">
-                                  <DialogHeader>
-                                    <DialogTitle className="flex items-center gap-2">
-                                      {item.type === 'bug' ? '🐛' : '💡'} {item.title}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                      Submitted by @{item.handle} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                                    </DialogDescription>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div>
-                                      <h4 className="font-semibold mb-2">Description</h4>
-                                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.description}</p>
+                              <div className="flex gap-2">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" variant="outline">View</Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-2xl">
+                                    <DialogHeader>
+                                      <DialogTitle className="flex items-center gap-2">
+                                        {item.type === 'bug' ? '🐛' : '💡'} {item.title}
+                                      </DialogTitle>
+                                      <DialogDescription>
+                                        Submitted by @{item.handle} • {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="font-semibold mb-2">Description</h4>
+                                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{item.description}</p>
+                                      </div>
+                                      {item.url && (
+                                        <div>
+                                          <h4 className="font-semibold mb-2">Related URL</h4>
+                                          <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
+                                            {item.url}
+                                          </a>
+                                        </div>
+                                      )}
+                                      {item.screenshot_url && (
+                                        <div>
+                                          <h4 className="font-semibold mb-2">Screenshot</h4>
+                                          <img src={item.screenshot_url} alt="Feedback screenshot" className="rounded-lg border max-w-full" />
+                                        </div>
+                                      )}
                                     </div>
-                                    {item.url && (
-                                      <div>
-                                        <h4 className="font-semibold mb-2">Related URL</h4>
-                                        <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">
-                                          {item.url}
-                                        </a>
-                                      </div>
-                                    )}
-                                    {item.screenshot_url && (
-                                      <div>
-                                        <h4 className="font-semibold mb-2">Screenshot</h4>
-                                        <img src={item.screenshot_url} alt="Feedback screenshot" className="rounded-lg border max-w-full" />
-                                      </div>
-                                    )}
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                                  </DialogContent>
+                                </Dialog>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => {
+                                    if (confirm("Delete this feedback permanently?")) {
+                                      handleDeleteFeedback(item.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}

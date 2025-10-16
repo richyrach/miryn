@@ -1,21 +1,66 @@
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useWarningCheck } from "@/hooks/useWarningCheck";
+import { supabase } from "@/integrations/supabase/client";
 
 interface WarningGuardProps {
   children: ReactNode;
 }
 
 export const WarningGuard = ({ children }: WarningGuardProps) => {
-  const { hasUnacknowledgedWarning, loading } = useWarningCheck();
+  const { hasUnacknowledgedWarning, loading, recheckWarningStatus } = useWarningCheck();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isAcknowledging, setIsAcknowledging] = useState(false);
 
+  // Listen for realtime changes to warning status
   useEffect(() => {
-    if (hasUnacknowledgedWarning && location.pathname !== "/warning") {
+    let channel: any;
+
+    const setupRealtime = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      channel = supabase
+        .channel('warning-status-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'user_warnings',
+            filter: `user_id=eq.${session.user.id}`
+          },
+          () => {
+            recheckWarningStatus();
+          }
+        )
+        .subscribe();
+    };
+
+    setupRealtime();
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [recheckWarningStatus]);
+
+  // Redirect to warning page if user has unacknowledged warnings
+  useEffect(() => {
+    if (!loading && hasUnacknowledgedWarning && location.pathname !== "/warning" && !isAcknowledging) {
       navigate("/warning", { replace: true });
     }
-  }, [hasUnacknowledgedWarning, location.pathname, navigate]);
+  }, [hasUnacknowledgedWarning, location.pathname, navigate, loading, isAcknowledging]);
+
+  // Redirect to home after all warnings acknowledged
+  useEffect(() => {
+    if (!loading && !hasUnacknowledgedWarning && location.pathname === "/warning") {
+      setIsAcknowledging(false);
+      navigate("/", { replace: true });
+    }
+  }, [hasUnacknowledgedWarning, location.pathname, navigate, loading]);
 
   if (loading) {
     return (
