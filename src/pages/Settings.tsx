@@ -10,9 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
-import { Check, Upload, User, Image as ImageIcon } from "lucide-react";
+import { Check, Upload, User, Image as ImageIcon, Mail } from "lucide-react";
 import { useRef } from "react";
-import { getDatabaseErrorMessage } from "@/lib/errorMessages";
+import { getDatabaseErrorMessage, getAuthErrorMessage } from "@/lib/errorMessages";
 import { SocialLinksManager } from "@/components/SocialLinksManager";
 import { CustomLinksManager } from "@/components/CustomLinksManager";
 
@@ -39,6 +39,10 @@ const Settings = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pwLoading, setPwLoading] = useState(false);
+  const [currentEmail, setCurrentEmail] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPassword, setEmailPassword] = useState("");
+  const [emailLoading, setEmailLoading] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const bannerInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -48,6 +52,7 @@ const Settings = () => {
         navigate("/login");
       } else {
         setUserId(session.user.id);
+        setCurrentEmail(session.user.email || "");
         fetchProfile(session.user.id);
       }
     });
@@ -455,6 +460,141 @@ const Settings = () => {
               </div>
               <Button type="submit" className="w-full" disabled={pwLoading}>
                 {pwLoading ? "Updating..." : "Update Password"}
+              </Button>
+            </form>
+          </div>
+
+          <div className="glass-card rounded-2xl p-8 mt-8">
+            <h2 className="text-2xl font-semibold mb-4">Change Email Address</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Update your email address. You'll need to verify the new email before the change is complete.
+            </p>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!userId) return;
+                
+                // Validate new email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(newEmail)) {
+                  toast({ title: "Invalid email", description: "Please enter a valid email address", variant: "destructive" });
+                  return;
+                }
+
+                if (newEmail === currentEmail) {
+                  toast({ title: "Same email", description: "New email must be different from current email", variant: "destructive" });
+                  return;
+                }
+
+                if (!emailPassword) {
+                  toast({ title: "Password required", description: "Please enter your current password to confirm", variant: "destructive" });
+                  return;
+                }
+
+                try {
+                  setEmailLoading(true);
+                  
+                  // Verify current password first
+                  const { error: signInError } = await supabase.auth.signInWithPassword({
+                    email: currentEmail,
+                    password: emailPassword,
+                  });
+
+                  if (signInError) {
+                    toast({ 
+                      title: "Invalid password", 
+                      description: "Please enter your correct current password", 
+                      variant: "destructive" 
+                    });
+                    setEmailLoading(false);
+                    return;
+                  }
+
+                  // Update email
+                  const { error } = await supabase.auth.updateUser({ 
+                    email: newEmail 
+                  });
+
+                  if (error) throw error;
+
+                  // Send notification to old email
+                  await supabase.functions.invoke("send-email-change-notification", {
+                    body: { 
+                      oldEmail: currentEmail, 
+                      newEmail: newEmail,
+                      displayName: profile.display_name 
+                    },
+                  });
+
+                  toast({ 
+                    title: "Verification email sent", 
+                    description: "Please check your new email to verify the change",
+                    duration: 8000
+                  });
+                  
+                  setNewEmail("");
+                  setEmailPassword("");
+                } catch (err: any) {
+                  toast({ 
+                    title: "Error updating email", 
+                    description: getAuthErrorMessage(err), 
+                    variant: "destructive" 
+                  });
+                } finally {
+                  setEmailLoading(false);
+                }
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <Label htmlFor="currentEmail">Current Email</Label>
+                <Input
+                  id="currentEmail"
+                  type="email"
+                  value={currentEmail}
+                  disabled
+                  className="mt-1 opacity-60"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newEmail">New Email Address</Label>
+                <Input
+                  id="newEmail"
+                  type="email"
+                  placeholder="newemail@example.com"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="emailPassword">Current Password (for verification)</Label>
+                <Input
+                  id="emailPassword"
+                  type="password"
+                  placeholder="Enter your current password"
+                  value={emailPassword}
+                  onChange={(e) => setEmailPassword(e.target.value)}
+                  required
+                  className="mt-1"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  We need your password to confirm this change
+                </p>
+              </div>
+              <Button type="submit" className="w-full" disabled={emailLoading}>
+                {emailLoading ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Updating Email...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Update Email Address
+                  </>
+                )}
               </Button>
             </form>
           </div>

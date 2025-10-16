@@ -1,1 +1,7 @@
 project_id = "trlxxzessfbwvfvzkhff"
+
+[functions.send-account-recovery]
+verify_jwt = false
+
+[functions.send-email-change-notification]
+verify_jwt = false

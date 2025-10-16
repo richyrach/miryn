@@ -28,6 +28,7 @@ import Warning from "./pages/Warning";
 import Banned from "./pages/Banned";
 import Feedback from "./pages/Feedback";
 import ServiceRequests from "./pages/ServiceRequests";
+import RecoverAccount from "./pages/RecoverAccount";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/recover-account" element={<RecoverAccount />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/people" element={<People />} />
               <Route path="/onboarding" element={<Onboarding />} />

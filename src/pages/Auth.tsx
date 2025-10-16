@@ -134,6 +134,11 @@ const Auth = () => {
                   <Button type="submit" className="w-full btn-hero" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  <div className="mt-4 text-center">
+                    <Link to="/recover-account" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                      Forgot your username?
+                    </Link>
+                  </div>
                 </form>
               </TabsContent>
 
