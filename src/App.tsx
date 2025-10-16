@@ -22,6 +22,7 @@ import Messages from "./pages/Messages";
 import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import NewService from "./pages/NewService";
+import EditService from "./pages/EditService";
 import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
@@ -61,8 +62,8 @@ const App = () => (
               <Route path="/services" element={<Services />} />
               <Route path="/services/new" element={<NewService />} />
               <Route path="/services/:serviceId" element={<ServiceDetail />} />
+              <Route path="/services/:serviceId/edit" element={<EditService />} />
               <Route path="/service-requests" element={<ServiceRequests />} />
-              <Route path="/bookmarks" element={<Bookmarks />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/feedback" element={<Feedback />} />
               <Route path="/:handle" element={<Profile />} />

@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { ConversationList } from "@/components/ConversationList";
-import { ChatWindow } from "@/components/ChatWindow";
 import { MessageCircle } from "lucide-react";
 
 const Messages = () => {
@@ -16,30 +14,19 @@ const Messages = () => {
           <div className="mb-6">
             <h1 className="text-3xl font-bold flex items-center gap-3">
               <MessageCircle className="w-8 h-8" />
-              Messages
+              Direct Messages (Coming Soon)
             </h1>
           </div>
 
-          <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-200px)]">
-            {/* Conversations List */}
-            <div className="border rounded-lg overflow-hidden bg-card">
-              <ConversationList
-                onSelectConversation={setSelectedConversation}
-                selectedConversationId={selectedConversation}
-              />
+            <div className="h-[calc(100vh-200px)] flex items-center justify-center">
+              <div className="text-center max-w-md">
+                <MessageCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <h2 className="text-2xl font-semibold mb-2">Private chat is on the way</h2>
+                <p className="text-muted-foreground">
+                  We’re building a safe, real‑time messaging experience. Check back soon!
+                </p>
+              </div>
             </div>
-
-            {/* Chat Window */}
-            <div className="border rounded-lg overflow-hidden bg-card">
-              {selectedConversation ? (
-                <ChatWindow conversationId={selectedConversation} />
-              ) : (
-                <div className="flex items-center justify-center h-full text-muted-foreground">
-                  Select a conversation to start messaging
-                </div>
-              )}
-            </div>
-          </div>
         </div>
       </main>
     </div>
