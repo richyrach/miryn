@@ -56,9 +56,12 @@ export const MessageButton = ({ targetUserId }: MessageButtonProps) => {
         .select()
         .single();
 
-      if (convError) throw convError;
+      if (convError) {
+        console.error("Conversation creation error:", convError);
+        throw convError;
+      }
 
-      // Add participants
+      // Add both participants in correct order
       const { error: partError } = await supabase
         .from("conversation_participants")
         .insert([
@@ -66,14 +69,18 @@ export const MessageButton = ({ targetUserId }: MessageButtonProps) => {
           { conversation_id: conversation.id, user_id: targetUserId },
         ]);
 
-      if (partError) throw partError;
+      if (partError) {
+        console.error("Participant addition error:", partError);
+        throw partError;
+      }
 
       navigate("/messages");
       toast({ title: "Conversation started!" });
     } catch (error: any) {
+      console.error("Message button error:", error);
       toast({
-        title: "Error",
-        description: error.message,
+        title: "Error starting conversation",
+        description: error.message || "Please try again later",
         variant: "destructive",
       });
     } finally {
