@@ -8,6 +8,7 @@ import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import { ProjectCommentSection } from "@/components/ProjectCommentSection";
 import { useToast } from "@/hooks/use-toast";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -242,7 +243,7 @@ const Project = () => {
 
              {/* Comments Section */}
              <div className="pt-8 border-t">
-               <ProjectCommentSection projectId={project.id} isAdmin={isOwner} />
+               <ProjectCommentSection projectId={project.id} isAdmin={isAdmin} />
              </div>
            </div>
         </div>

@@ -15,6 +15,7 @@ import { useRef } from "react";
 import { getDatabaseErrorMessage, getAuthErrorMessage } from "@/lib/errorMessages";
 import { SocialLinksManager } from "@/components/SocialLinksManager";
 import { CustomLinksManager } from "@/components/CustomLinksManager";
+import { PrivacySettings } from "@/components/PrivacySettings";
 
 const profileSchema = z.object({
   display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
@@ -609,6 +610,11 @@ const Settings = () => {
           <div className="glass-card rounded-2xl p-8 mt-8">
             <h2 className="text-2xl font-semibold mb-4">Custom Links</h2>
             <CustomLinksManager userId={userId!} profile={profile} onUpdate={() => fetchProfile(userId!)} />
+          </div>
+
+          {/* Privacy Settings Section */}
+          <div className="glass-card rounded-2xl p-8 mt-8">
+            <PrivacySettings />
           </div>
         </div>
       </main>

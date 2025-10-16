@@ -1,51 +1,45 @@
+import { useState } from "react";
 import { Navbar } from "@/components/Navbar";
-import { MessageCircle, Clock } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { ConversationList } from "@/components/ConversationList";
+import { ChatWindow } from "@/components/ChatWindow";
+import { MessageCircle } from "lucide-react";
 
 const Messages = () => {
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+
   return (
     <div className="min-h-screen">
       <Navbar />
       
-      <main className="pt-32 pb-20 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-              <MessageCircle className="w-10 h-10" />
+      <main className="pt-20 pb-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-6">
+            <h1 className="text-3xl font-bold flex items-center gap-3">
+              <MessageCircle className="w-8 h-8" />
               Messages
             </h1>
           </div>
 
-          <Card className="glass-card p-12 text-center">
-            <div className="flex flex-col items-center justify-center space-y-6">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                <Clock className="w-12 h-12 text-primary" />
-              </div>
-              
-              <div className="space-y-2">
-                <h2 className="text-3xl font-bold">Coming Soon</h2>
-                <p className="text-muted-foreground text-lg max-w-md">
-                  We're working hard to bring you an amazing messaging experience. 
-                  Direct messaging will be available soon!
-                </p>
-              </div>
-
-              <div className="pt-4 space-y-2 text-sm text-muted-foreground">
-                <p className="flex items-center justify-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Real-time messaging
-                </p>
-                <p className="flex items-center justify-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  File sharing
-                </p>
-                <p className="flex items-center justify-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                  Message notifications
-                </p>
-              </div>
+          <div className="grid md:grid-cols-[350px_1fr] gap-4 h-[calc(100vh-200px)]">
+            {/* Conversations List */}
+            <div className="border rounded-lg overflow-hidden bg-card">
+              <ConversationList
+                onSelectConversation={setSelectedConversation}
+                selectedConversationId={selectedConversation}
+              />
             </div>
-          </Card>
+
+            {/* Chat Window */}
+            <div className="border rounded-lg overflow-hidden bg-card">
+              {selectedConversation ? (
+                <ChatWindow conversationId={selectedConversation} />
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Select a conversation to start messaging
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>
