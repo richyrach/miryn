@@ -276,6 +276,7 @@ export type Database = {
           id: string
           intro_url: string | null
           location: string | null
+          preferences: Json | null
           primary_cta: string | null
           primary_cta_url: string | null
           profile_layout: string | null
@@ -297,6 +298,7 @@ export type Database = {
           id?: string
           intro_url?: string | null
           location?: string | null
+          preferences?: Json | null
           primary_cta?: string | null
           primary_cta_url?: string | null
           profile_layout?: string | null
@@ -318,6 +320,7 @@ export type Database = {
           id?: string
           intro_url?: string | null
           location?: string | null
+          preferences?: Json | null
           primary_cta?: string | null
           primary_cta_url?: string | null
           profile_layout?: string | null

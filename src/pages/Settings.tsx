@@ -16,6 +16,7 @@ import { getDatabaseErrorMessage, getAuthErrorMessage } from "@/lib/errorMessage
 import { SocialLinksManager } from "@/components/SocialLinksManager";
 import { CustomLinksManager } from "@/components/CustomLinksManager";
 import { PrivacySettings } from "@/components/PrivacySettings";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const profileSchema = z.object({
   display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
@@ -610,6 +611,12 @@ const Settings = () => {
           <div className="glass-card rounded-2xl p-8 mt-8">
             <h2 className="text-2xl font-semibold mb-4">Custom Links</h2>
             <CustomLinksManager userId={userId!} profile={profile} onUpdate={() => fetchProfile(userId!)} />
+          </div>
+
+          {/* Language & Preferences Section */}
+          <div className="glass-card rounded-2xl p-8 mt-8">
+            <h2 className="text-2xl font-semibold mb-4">Preferences</h2>
+            <LanguageSelector />
           </div>
 
           {/* Privacy Settings Section */}
