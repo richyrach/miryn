@@ -15,6 +15,7 @@ import People from "./pages/People";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
 import NewProject from "./pages/NewProject";
+import EditProject from "./pages/EditProject";
 import Profile from "./pages/Profile";
 import Project from "./pages/Project";
 import Admin from "./pages/Admin";
@@ -57,6 +58,7 @@ const App = () => (
               <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/new" element={<NewProject />} />
+              <Route path="/projects/:projectId/edit" element={<EditProject />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/services" element={<Services />} />

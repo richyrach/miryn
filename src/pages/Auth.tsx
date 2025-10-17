@@ -174,12 +174,10 @@ const Auth = () => {
                       type="password"
                       required
                       className="mt-1"
-                      minLength={12}
-                      pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$"
-                      title="Password must be at least 12 characters with uppercase, lowercase, number, and special character (@$!%*?&)"
+                      minLength={8}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
-                      12+ characters, with uppercase, lowercase, number, and special character
+                      At least 8 characters
                     </p>
                   </div>
                   <Button type="submit" className="w-full btn-hero" disabled={loading}>

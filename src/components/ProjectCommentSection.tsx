@@ -67,33 +67,54 @@ export const ProjectCommentSection = ({
   };
 
   const fetchComments = async () => {
-    const { data, error } = await supabase
+    // Fetch comments without join
+    const { data: commentsData, error: commentsError } = await supabase
       .from("project_comments")
-      .select(
-        `
-        id,
-        content,
-        created_at,
-        updated_at,
-        edited_at,
-        user_id,
-        profiles (
-          display_name,
-          handle,
-          avatar_url
-        )
-      `
-      )
+      .select("id, content, created_at, updated_at, edited_at, user_id")
       .eq("project_id", projectId)
       .is("deleted_at", null)
       .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching comments:", error);
+    if (commentsError) {
+      console.error("Error fetching comments:", commentsError);
       return;
     }
 
-    setComments(data as any || []);
+    if (!commentsData || commentsData.length === 0) {
+      setComments([]);
+      return;
+    }
+
+    // Get unique user IDs
+    const userIds = [...new Set(commentsData.map(c => c.user_id))];
+
+    // Fetch profiles for those users
+    const { data: profilesData, error: profilesError } = await supabase
+      .from("profiles")
+      .select("user_id, display_name, handle, avatar_url")
+      .in("user_id", userIds);
+
+    if (profilesError) {
+      console.error("Error fetching profiles:", profilesError);
+      return;
+    }
+
+    // Create a map of user_id to profile
+    const profileMap = new Map(
+      (profilesData || []).map(p => [p.user_id, p])
+    );
+
+    // Merge comments with profile data
+    const enrichedComments = commentsData.map(comment => ({
+      ...comment,
+      profiles: profileMap.get(comment.user_id) || {
+        display_name: "Unknown User",
+        handle: "unknown",
+        avatar_url: null,
+      },
+    }));
+
+    setComments(enrichedComments as any);
   };
 
   const handleSubmit = async () => {
