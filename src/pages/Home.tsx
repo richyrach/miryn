@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -9,6 +10,7 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { supabase } from "@/integrations/supabase/client";
 
 const Home = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     creators: 0,
     projects: 0,
@@ -116,7 +118,7 @@ const Home = () => {
               >
                 <Link to="/login">
                   <Rocket className="w-5 h-5 mr-2" />
-                  Create your profile
+                  {t('auth.createAccount')}
                 </Link>
               </Button>
               <Button
@@ -125,7 +127,7 @@ const Home = () => {
                 className="text-base sm:text-lg h-12 sm:h-14 px-6 sm:px-8"
                 asChild
               >
-                <Link to="/explore">Explore projects</Link>
+                <Link to="/explore">{t('nav.explore')}</Link>
               </Button>
             </div>
           </div>
@@ -133,9 +135,9 @@ const Home = () => {
           {/* Live Stats */}
           <div className="glass-card rounded-2xl p-8 mb-20 animate-fade-in">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <StatsCounter end={stats.creators} label="Creators" />
-              <StatsCounter end={stats.projects} label="Projects" />
-              <StatsCounter end={stats.services} label="Services" />
+              <StatsCounter end={stats.creators} label={t('people.title')} />
+              <StatsCounter end={stats.projects} label={t('profile.projects')} />
+              <StatsCounter end={stats.services} label={t('profile.services')} />
               <StatsCounter end={stats.connections} label="Connections" />
             </div>
           </div>
@@ -144,9 +146,9 @@ const Home = () => {
           {featuredProjects.length > 0 && (
             <div className="mb-20 animate-fade-in">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold">Featured Projects</h2>
+                <h2 className="text-3xl font-bold">{t('explore.latestProjects')}</h2>
                 <Button variant="outline" asChild>
-                  <Link to="/explore">View All</Link>
+                  <Link to="/explore">{t('common.viewAll')}</Link>
                 </Button>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -170,9 +172,9 @@ const Home = () => {
           {featuredServices.length > 0 && (
             <div className="mb-20 animate-fade-in">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-bold">Featured Services</h2>
+                <h2 className="text-3xl font-bold">{t('service.browseServices')}</h2>
                 <Button variant="outline" asChild>
-                  <Link to="/services">Browse All</Link>
+                  <Link to="/services">{t('common.viewAll')}</Link>
                 </Button>
               </div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">

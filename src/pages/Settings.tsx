@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { z } from "zod";
 import { Check, Upload, User, Image as ImageIcon, Mail } from "lucide-react";
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getDatabaseErrorMessage, getAuthErrorMessage } from "@/lib/errorMessages";
 import { SocialLinksManager } from "@/components/SocialLinksManager";
 import { CustomLinksManager } from "@/components/CustomLinksManager";
@@ -28,6 +28,7 @@ const profileSchema = z.object({
 });
 
 const Settings = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);

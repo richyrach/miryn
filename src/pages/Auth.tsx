@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Navbar } from "@/components/Navbar";
 import { getAuthErrorMessage } from "@/lib/errorMessages";
 
 const Auth = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -144,9 +146,9 @@ const Auth = () => {
 
               <TabsContent value="signup">
                 <form onSubmit={handleSignUp} className="space-y-4">
-                  <div>
-                    <Label htmlFor="username">Username</Label>
-                    <Input
+                <div>
+                  <Label htmlFor="username">{t('auth.username')}</Label>
+                  <Input
                       id="username"
                       name="username"
                       type="text"
