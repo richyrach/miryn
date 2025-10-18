@@ -861,6 +861,10 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: number
       }
+      has_moderation: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
       has_premium: {
         Args: { target_user_id: string }
         Returns: boolean
@@ -870,6 +874,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_support: {
+        Args: { _user_id: string }
         Returns: boolean
       }
       is_admin: {

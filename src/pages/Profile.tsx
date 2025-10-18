@@ -12,6 +12,7 @@ import { MessageButton } from "@/components/MessageButton";
 import { User, MapPin, ExternalLink } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import { SocialLinks } from "@/components/SocialLinks";
+import { useUserRole } from "@/hooks/useUserRole";
 
 const Profile = () => {
   const { handle } = useParams();
@@ -22,7 +23,7 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const { role: userRole } = useUserRole(profile?.user_id);
 
   useEffect(() => {
     if (handle) {
@@ -60,19 +61,6 @@ const Profile = () => {
         .order("created_at", { ascending: false });
 
       setServices(servicesData || []);
-
-      // Fetch user's roles
-      const { data: rolesData } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", profileData.user_id);
-      
-      // Determine highest role (owner > admin > moderator > content_mod > junior_mod > support)
-      if (rolesData && rolesData.length > 0) {
-        const roleHierarchy = ['owner', 'admin', 'moderator', 'content_mod', 'junior_mod', 'support'];
-        const highestRole = roleHierarchy.find(r => rolesData.some(rd => rd.role === r));
-        setUserRole(highestRole || null);
-      }
 
       // Get user_id for follow counts
       const { data: profileWithUserId } = await supabase
@@ -152,12 +140,14 @@ const Profile = () => {
             
             <div className="p-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
-                <div className={`w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden border-4 border-background flex-shrink-0 ${profile.banner_url ? '-mt-16' : ''}`}>
-                  {profile.avatar_url ? (
-                    <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-12 h-12 text-muted-foreground" />
-                  )}
+                <div className={`w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 ${profile.banner_url ? '-mt-16' : ''} ${userRole === 'vip' ? 'border-4 border-transparent bg-gradient-to-br from-amber-500 via-yellow-600 to-amber-500 p-1' : 'border-4 border-background'}`}>
+                  <div className="w-full h-full rounded-full overflow-hidden bg-background flex items-center justify-center">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="w-12 h-12 text-muted-foreground" />
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex-1">
