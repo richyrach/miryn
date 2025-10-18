@@ -2,17 +2,19 @@ import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 const languages = [
   { code: 'en', name: 'English' },
   { code: 'es', name: 'Español' },
   { code: 'zh-CN', name: '中文' },
+  { code: 'fr', name: 'Français' },
+  { code: 'de', name: 'Deutsch' },
+  { code: 'ja', name: '日本語' },
+  { code: 'pt', name: 'Português' },
 ];
 
 export const LanguageSelector = () => {
   const { i18n, t } = useTranslation();
-  const { toast } = useToast();
 
   const handleLanguageChange = async (languageCode: string) => {
     // Update i18n

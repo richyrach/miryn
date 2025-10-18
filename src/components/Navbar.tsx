@@ -3,6 +3,7 @@ import { Button } from "./ui/button";
 import { User, LogOut, Settings, PlusCircle, Shield, MessageCircle, Briefcase, Menu, X, MessageSquareWarning } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { NotificationBell } from "./NotificationBell";
 
 export const Navbar = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [handle, setHandle] = useState<string | null>(null);
@@ -91,19 +93,19 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/explore" className="text-foreground hover:text-primary transition-colors">
-              Explore
+              {t('nav.explore')}
             </Link>
             <Link to="/people" className="text-foreground hover:text-primary transition-colors">
-              People
+              {t('nav.people')}
             </Link>
             <Link to="/services" className="text-foreground hover:text-primary transition-colors">
-              Services
+              {t('nav.services')}
             </Link>
 
             {user && (
               <>
                 <Link to="/service-requests" className="text-foreground hover:text-primary transition-colors relative">
-                  Requests
+                  {t('nav.services')}
                   {pendingCount > 0 && (
                     <span className="absolute -top-1 -right-3 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                       {pendingCount}
@@ -133,7 +135,7 @@ export const Navbar = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-background border z-50">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('settings.account')}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {handle && (
                       <DropdownMenuItem asChild>
@@ -144,16 +146,16 @@ export const Navbar = () => {
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem asChild>
-                      <Link to="/settings" className="cursor-pointer">
-                        <Settings className="w-4 h-4 mr-2" />
-                        Settings
-                      </Link>
+                        <Link to="/settings" className="cursor-pointer">
+                          <Settings className="w-4 h-4 mr-2" />
+                          {t('nav.settings')}
+                        </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/feedback" className="cursor-pointer">
-                        <MessageSquareWarning className="w-4 h-4 mr-2" />
-                        Feedback
-                      </Link>
+                        <Link to="/feedback" className="cursor-pointer">
+                          <MessageSquareWarning className="w-4 h-4 mr-2" />
+                          {t('nav.feedback')}
+                        </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
                       <>
@@ -161,7 +163,7 @@ export const Navbar = () => {
                         <DropdownMenuItem asChild>
                           <Link to="/admin" className="cursor-pointer text-primary">
                             <Shield className="w-4 h-4 mr-2" />
-                            Admin Panel
+                            {t('nav.admin')}
                           </Link>
                         </DropdownMenuItem>
                       </>
@@ -169,7 +171,7 @@ export const Navbar = () => {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-destructive">
                       <LogOut className="w-4 h-4 mr-2" />
-                      Sign Out
+                      {t('nav.signOut')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -178,7 +180,7 @@ export const Navbar = () => {
               <Button asChild className="btn-hero">
                 <Link to="/auth">
                   <User className="w-4 h-4 mr-2" />
-                  Sign in
+                  {t('nav.signIn')}
                 </Link>
               </Button>
             )}
