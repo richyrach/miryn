@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Search, Briefcase, DollarSign, Clock, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "react-i18next";
 
 interface Service {
   id: string;
@@ -28,6 +29,7 @@ interface Service {
 }
 
 const Services = () => {
+  const { t } = useTranslation();
   const [services, setServices] = useState<Service[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
@@ -82,15 +84,15 @@ const Services = () => {
             </div>
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-4xl md:text-5xl font-bold mb-4">Browse Services</h1>
+                <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('service.browseServices')}</h1>
                 <p className="text-muted-foreground text-lg">
-                  Hire talented professionals for your next project
+                  {t('service.description')}
                 </p>
               </div>
               <Button asChild className="btn-hero">
                 <Link to="/services/new">
                   <Plus className="w-4 h-4 mr-2" />
-                  List Service
+                  {t('service.listService')}
                 </Link>
               </Button>
             </div>
@@ -100,12 +102,12 @@ const Services = () => {
           <div className="glass-card rounded-2xl p-6 mb-8">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="search">Search Services</Label>
+                <Label htmlFor="search">{t('service.search')}</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search by title or description..."
+                    placeholder={t('service.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -114,7 +116,7 @@ const Services = () => {
               </div>
               
                <div>
-                 <Label htmlFor="category">Category</Label>
+                 <Label htmlFor="category">{t('service.category')}</Label>
                  <div className="mt-1">
                    <select
                      id="category"
@@ -122,7 +124,7 @@ const Services = () => {
                      value={categoryFilter}
                      onChange={(e) => setCategoryFilter(e.target.value)}
                    >
-                     <option value="">All categories</option>
+                     <option value="">{t('service.allCategories')}</option>
                      {categories.map((cat) => (
                        <option key={cat} value={cat}>{cat}</option>
                      ))}
@@ -133,7 +135,7 @@ const Services = () => {
 
             {categories.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
-                <span className="text-sm text-muted-foreground">Popular:</span>
+                <span className="text-sm text-muted-foreground">{t('service.popular')}:</span>
                 {categories.slice(0, 5).map((cat) => (
                   <Badge
                     key={cat}
@@ -151,11 +153,11 @@ const Services = () => {
           {/* Services Grid */}
           {loading ? (
             <div className="text-center py-20 text-muted-foreground">
-              Loading services...
+              {t('service.loading')}
             </div>
           ) : filteredServices.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              No services found. Try adjusting your filters.
+              {t('service.noServices')}
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

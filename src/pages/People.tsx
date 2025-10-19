@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Profile {
   id: string;
@@ -14,10 +15,12 @@ interface Profile {
   skills: string[];
   hireable: boolean;
   avatar_url: string | null;
-  role: string;
+  user_id: string;
+  roles: string[];
 }
 
 const People = () => {
+  const { t } = useTranslation();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [hireableOnly, setHireableOnly] = useState(false);
@@ -31,13 +34,13 @@ const People = () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("public_profiles")
-      .select("*")
+      .select("id, user_id, handle, display_name, skills, hireable, avatar_url, roles")
       .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching profiles:", error);
     } else {
-      setProfiles(data);
+      setProfiles(data || []);
     }
     setLoading(false);
   };
@@ -60,9 +63,9 @@ const People = () => {
       <main className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Discover People</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('people.title')}</h1>
             <p className="text-muted-foreground text-lg">
-              Connect with talented creators and collaborators
+              {t('people.description')}
             </p>
           </div>
 
@@ -70,12 +73,12 @@ const People = () => {
           <div className="glass-card rounded-2xl p-6 mb-8">
             <div className="grid md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="search">Search</Label>
+                <Label htmlFor="search">{t('common.search')}</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search by name, handle, or skills..."
+                    placeholder={t('people.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -91,7 +94,7 @@ const People = () => {
                     onCheckedChange={(checked) => setHireableOnly(checked as boolean)}
                   />
                   <Label htmlFor="hireable" className="cursor-pointer">
-                    Available for hire only
+                    {t('people.hireableOnly')}
                   </Label>
                 </div>
               </div>
@@ -101,11 +104,11 @@ const People = () => {
           {/* Profiles Grid */}
           {loading ? (
             <div className="text-center py-20 text-muted-foreground">
-              Loading profiles...
+              {t('people.loading')}
             </div>
           ) : filteredProfiles.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              No profiles found. Try adjusting your filters.
+              {t('people.noResults')}
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -113,11 +116,11 @@ const People = () => {
                 <ProfileCard
                   key={profile.id}
                   handle={profile.handle}
-                  displayName={profile.display_name}
+                  display_name={profile.display_name}
                   skills={profile.skills}
                   hireable={profile.hireable}
-                  avatarUrl={profile.avatar_url}
-                  role={profile.role}
+                  avatar_url={profile.avatar_url}
+                  roles={profile.roles}
                 />
               ))}
             </div>

@@ -13,7 +13,9 @@
     "previous": "Previous",
     "submit": "Submit",
     "close": "Close",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "by": "by",
+    "madeBy": "Made by"
   },
   "nav": {
     "home": "Home",
@@ -108,27 +110,44 @@
     "newService": "New Service",
     "editService": "Edit Service",
     "browseServices": "Browse Services",
+    "description": "Hire talented professionals for your next project",
+    "listService": "List Service",
     "category": "Category",
     "pricing": "Pricing",
     "deliveryTime": "Delivery Time",
+    "delivery": "delivery",
     "features": "Features",
     "requirements": "Requirements",
     "contactMethods": "Contact Methods",
     "paymentMethods": "Payment Methods",
     "requestService": "Request Service",
-    "noServices": "No services available"
+    "noServices": "No services found. Try adjusting your filters.",
+    "loading": "Loading services...",
+    "search": "Search Services",
+    "searchPlaceholder": "Search by title or description...",
+    "allCategories": "All categories",
+    "popular": "Popular"
   },
   "people": {
-    "title": "People",
+    "title": "Discover People",
+    "description": "Connect with talented creators and collaborators",
     "searchPeople": "Search people...",
-    "hireableOnly": "Hireable only",
-    "noResults": "No profiles found",
+    "searchPlaceholder": "Search by name, handle, or skills...",
+    "hireableOnly": "Available for hire only",
+    "noResults": "No profiles found. Try adjusting your filters.",
     "loading": "Loading profiles..."
   },
   "explore": {
-    "title": "Explore",
+    "title": "Explore Projects",
+    "description": "Discover amazing work from talented creators",
     "latestProjects": "Latest Projects",
-    "noProjects": "No projects to display"
+    "noProjects": "No projects found. Try adjusting your filters.",
+    "loading": "Loading projects...",
+    "search": "Search",
+    "searchPlaceholder": "Search projects...",
+    "techStack": "Tech Stack",
+    "techStackPlaceholder": "Filter by technology...",
+    "hireableCreators": "Hireable creators only"
   },
   "notifications": {
     "title": "Notifications",
@@ -146,7 +165,10 @@
     "roles": "Roles",
     "announcements": "Announcements",
     "users": "Users",
-    "moderation": "Moderation"
+    "moderation": "Moderation",
+    "accessDenied": "Access Denied",
+    "noPermission": "You don't have permission to access this page.",
+    "feedback": "Feedback"
   },
   "feedback": {
     "title": "Feedback",

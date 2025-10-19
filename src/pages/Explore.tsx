@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface Project {
   id: string;
@@ -20,6 +21,7 @@ interface Project {
 }
 
 const Explore = () => {
+  const { t } = useTranslation();
   const [projects, setProjects] = useState<Project[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [skillFilter, setSkillFilter] = useState("");
@@ -76,9 +78,9 @@ const Explore = () => {
       <main className="pt-32 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Explore Projects</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">{t('explore.title')}</h1>
             <p className="text-muted-foreground text-lg">
-              Discover amazing work from talented creators
+              {t('explore.description')}
             </p>
           </div>
 
@@ -86,12 +88,12 @@ const Explore = () => {
           <div className="glass-card rounded-2xl p-6 mb-8">
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="search">Search</Label>
+                <Label htmlFor="search">{t('explore.search')}</Label>
                 <div className="relative mt-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder="Search projects..."
+                    placeholder={t('explore.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -100,10 +102,10 @@ const Explore = () => {
               </div>
               
               <div>
-                <Label htmlFor="skill">Tech Stack</Label>
+                <Label htmlFor="skill">{t('explore.techStack')}</Label>
                 <Input
                   id="skill"
-                  placeholder="Filter by technology..."
+                  placeholder={t('explore.techStackPlaceholder')}
                   value={skillFilter}
                   onChange={(e) => setSkillFilter(e.target.value)}
                   className="mt-1"
@@ -118,7 +120,7 @@ const Explore = () => {
                     onCheckedChange={(checked) => setHireableOnly(checked as boolean)}
                   />
                   <Label htmlFor="hireable" className="cursor-pointer">
-                    Hireable creators only
+                    {t('explore.hireableCreators')}
                   </Label>
                 </div>
               </div>
@@ -128,11 +130,11 @@ const Explore = () => {
           {/* Projects Grid */}
           {loading ? (
             <div className="text-center py-20 text-muted-foreground">
-              Loading projects...
+              {t('explore.loading')}
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
-              No projects found. Try adjusting your filters.
+              {t('explore.noProjects')}
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Badge } from "./ui/badge";
 import { ProjectLikeButton } from "./ProjectLikeButton";
+import { useTranslation } from "react-i18next";
 
 interface ProjectCardProps {
   id: string;
@@ -21,6 +22,8 @@ export const ProjectCard = ({
   stack,
   ownerHandle,
 }: ProjectCardProps) => {
+  const { t } = useTranslation();
+  
   return (
     <Link to={`/${ownerHandle}/${slug}`} className="block group">
       <div className="glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-glow hover:scale-105">
@@ -59,7 +62,7 @@ export const ProjectCard = ({
             )}
           </div>
           <div className="flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">by @{ownerHandle}</p>
+            <p className="text-xs text-muted-foreground">{t('common.by')} @{ownerHandle}</p>
             <div onClick={(e) => e.preventDefault()} className="flex items-center gap-2">
               <ProjectLikeButton projectId={id} />
             </div>

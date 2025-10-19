@@ -261,6 +261,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       profiles: {
@@ -761,6 +768,7 @@ export type Database = {
       }
       user_roles: {
         Row: {
+          auto_assigned: boolean | null
           created_at: string
           created_by: string | null
           id: string
@@ -768,6 +776,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          auto_assigned?: boolean | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -775,6 +784,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          auto_assigned?: boolean | null
           created_at?: string
           created_by?: string | null
           id?: string
@@ -829,9 +839,46 @@ export type Database = {
           location: string | null
           primary_cta: string | null
           primary_cta_url: string | null
-          role: string | null
+          roles: string[] | null
           skills: string[] | null
           updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          handle?: string | null
+          hireable?: boolean | null
+          id?: string | null
+          intro_url?: string | null
+          location?: string | null
+          primary_cta?: string | null
+          primary_cta_url?: string | null
+          roles?: never
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          banner_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          handle?: string | null
+          hireable?: boolean | null
+          id?: string | null
+          intro_url?: string | null
+          location?: string | null
+          primary_cta?: string | null
+          primary_cta_url?: string | null
+          roles?: never
+          skills?: string[] | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }

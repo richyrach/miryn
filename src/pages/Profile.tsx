@@ -12,9 +12,12 @@ import { MessageButton } from "@/components/MessageButton";
 import { User, MapPin, ExternalLink } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import { SocialLinks } from "@/components/SocialLinks";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { VerifiedCheckmark } from "@/components/VerifiedCheckmark";
+import { useTranslation } from "react-i18next";
 
 const Profile = () => {
+  const { t } = useTranslation();
   const { handle } = useParams();
   const [profile, setProfile] = useState<any>(null);
   const [projects, setProjects] = useState<any[]>([]);
@@ -23,7 +26,10 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [targetUserId, setTargetUserId] = useState<string | null>(null);
-  const { role: userRole } = useUserRole(profile?.user_id);
+  const { roles: userRoles } = useUserRoles(profile?.user_id);
+  
+  // Check if user has VIP role
+  const isVIP = userRoles.includes('vip');
 
   useEffect(() => {
     if (handle) {
@@ -104,7 +110,7 @@ const Profile = () => {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="pt-32 text-center">Loading profile...</div>
+        <div className="pt-32 text-center">{t('profile.loading')}</div>
       </div>
     );
   }
@@ -114,9 +120,9 @@ const Profile = () => {
       <div className="min-h-screen">
         <Navbar />
         <div className="pt-32 text-center">
-          <h1 className="text-4xl font-bold mb-4">Profile not found</h1>
+          <h1 className="text-4xl font-bold mb-4">{t('profile.notFound')}</h1>
           <Button asChild>
-            <Link to="/people">Browse People</Link>
+            <Link to="/people">{t('profile.browsePeople')}</Link>
           </Button>
         </div>
       </div>
@@ -140,7 +146,7 @@ const Profile = () => {
             
             <div className="p-8">
               <div className="flex flex-col md:flex-row gap-8 items-start">
-                <div className={`w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 ${profile.banner_url ? '-mt-16' : ''} ${userRole === 'vip' ? 'border-4 border-transparent bg-gradient-to-br from-amber-500 via-yellow-600 to-amber-500 p-1' : 'border-4 border-background'}`}>
+                <div className={`w-24 h-24 rounded-full bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 ${profile.banner_url ? '-mt-16' : ''} ${isVIP ? 'border-4 border-transparent bg-gradient-to-br from-amber-500 via-yellow-600 to-amber-500 p-1' : 'border-4 border-background'}`}>
                   <div className="w-full h-full rounded-full overflow-hidden bg-background flex items-center justify-center">
                     {profile.avatar_url ? (
                       <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" />
@@ -152,10 +158,20 @@ const Profile = () => {
 
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-3 mb-3">
-                    <h1 className="text-3xl md:text-4xl font-bold">{profile.display_name}</h1>
-                    <RoleBadge role={userRole} />
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-3xl md:text-4xl font-bold">{profile.display_name}</h1>
+                      <VerifiedCheckmark roles={userRoles} size="lg" />
+                    </div>
+                    {userRoles.filter(r => r !== 'user').slice(0, 3).map((role, i) => (
+                      <RoleBadge key={i} role={role} />
+                    ))}
+                    {userRoles.filter(r => r !== 'user').length > 3 && (
+                      <Badge variant="outline">
+                        +{userRoles.filter(r => r !== 'user').length - 3} more
+                      </Badge>
+                    )}
                     {profile.hireable && (
-                      <Badge className="badge-hireable">Available for hire</Badge>
+                      <Badge className="badge-hireable">{t('profile.hireable')}</Badge>
                     )}
                   </div>
                 
@@ -163,10 +179,10 @@ const Profile = () => {
                 
                 <div className="flex items-center gap-4 mb-4">
                   <span className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">{followerCount}</strong> Followers
+                    <strong className="text-foreground">{followerCount}</strong> {t('profile.followers')}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">{followingCount}</strong> Following
+                    <strong className="text-foreground">{followingCount}</strong> {t('profile.following')}
                   </span>
                 </div>
 
@@ -233,11 +249,11 @@ const Profile = () => {
 
           {/* Projects */}
           <div>
-            <h2 className="text-3xl font-bold mb-6">Projects</h2>
+            <h2 className="text-3xl font-bold mb-6">{t('profile.projects')}</h2>
             
             {projects.length === 0 ? (
               <div className="glass-card rounded-2xl p-12 text-center text-muted-foreground">
-                No projects yet.
+                {t('profile.noProjects')}
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -260,7 +276,7 @@ const Profile = () => {
           {/* Services */}
           {services.length > 0 && (
             <div className="mt-12">
-              <h2 className="text-3xl font-bold mb-6">Services</h2>
+              <h2 className="text-3xl font-bold mb-6">{t('profile.services')}</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {services.map((service) => (
                   <ServiceCard
