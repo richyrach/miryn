@@ -12,7 +12,10 @@
     "next": "次へ",
     "previous": "前へ",
     "submit": "送信",
-    "close": "閉じる"
+    "close": "閉じる",
+    "viewAll": "すべて表示",
+    "by": "投稿者",
+    "madeBy": "作成者"
   },
   "nav": {
     "home": "ホーム",
@@ -80,5 +83,100 @@
     "message": "メッセージ",
     "follow": "フォロー",
     "unfollow": "フォロー解除"
+  },
+  "project": {
+    "newProject": "新規プロジェクト",
+    "editProject": "プロジェクト編集",
+    "createProject": "プロジェクト作成",
+    "title": "プロジェクト名",
+    "slug": "プロジェクトURL",
+    "description": "説明",
+    "technologies": "使用技術",
+    "cover": "カバー画像",
+    "actionButton": "アクションボタン",
+    "buttonText": "ボタンテキスト",
+    "buttonLink": "ボタンリンク",
+    "comments": "コメント",
+    "postComment": "コメント投稿",
+    "posting": "投稿中...",
+    "signInToComment": "コメントするにはログインしてください",
+    "noComments": "コメントはまだありません。最初にコメントしましょう！",
+    "shareThoughts": "感想を共有...",
+    "commentPosted": "コメントを投稿しました！",
+    "commentUpdated": "コメントを更新しました",
+    "commentDeleted": "コメントを削除しました"
+  },
+  "service": {
+    "newService": "新規サービス",
+    "editService": "サービス編集",
+    "browseServices": "サービスを閲覧",
+    "description": "次のプロジェクトに才能あるプロフェッショナルを雇用",
+    "listService": "サービスを掲載",
+    "category": "カテゴリー",
+    "pricing": "料金",
+    "deliveryTime": "納期",
+    "delivery": "納品",
+    "features": "機能",
+    "requirements": "要件",
+    "contactMethods": "連絡方法",
+    "paymentMethods": "支払方法",
+    "requestService": "サービス依頼",
+    "noServices": "サービスが見つかりません。フィルターを調整してください。",
+    "loading": "サービス読み込み中...",
+    "search": "サービス検索",
+    "searchPlaceholder": "タイトルまたは説明で検索...",
+    "allCategories": "すべてのカテゴリー",
+    "popular": "人気"
+  },
+  "people": {
+    "title": "人々を発見",
+    "description": "才能あるクリエイターやコラボレーターとつながる",
+    "searchPeople": "人々を検索...",
+    "searchPlaceholder": "名前、ハンドル、スキルで検索...",
+    "hireableOnly": "採用可能のみ",
+    "noResults": "プロフィールが見つかりません。フィルターを調整してください。",
+    "loading": "プロフィール読み込み中..."
+  },
+  "explore": {
+    "title": "プロジェクトを探索",
+    "description": "才能あるクリエイターの素晴らしい作品を発見",
+    "latestProjects": "最新プロジェクト",
+    "noProjects": "プロジェクトが見つかりません。フィルターを調整してください。",
+    "loading": "プロジェクト読み込み中...",
+    "search": "検索",
+    "searchPlaceholder": "プロジェクトを検索...",
+    "techStack": "技術スタック",
+    "techStackPlaceholder": "技術でフィルター...",
+    "hireableCreators": "採用可能なクリエイターのみ"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "すべて既読にする",
+    "noNotifications": "通知なし",
+    "newMessage": "新しいメッセージ",
+    "newFollower": "新しいフォロワー",
+    "announcement": "お知らせ"
+  },
+  "admin": {
+    "title": "管理者パネル",
+    "reports": "報告",
+    "warnings": "警告",
+    "bans": "禁止",
+    "roles": "役割",
+    "announcements": "お知らせ",
+    "users": "ユーザー",
+    "moderation": "モデレーション",
+    "accessDenied": "アクセス拒否",
+    "noPermission": "このページにアクセスする権限がありません。",
+    "feedback": "フィードバック"
+  },
+  "feedback": {
+    "title": "フィードバック",
+    "submitFeedback": "フィードバック送信",
+    "bugReport": "バグ報告",
+    "featureRequest": "機能リクエスト",
+    "other": "その他",
+    "description": "説明",
+    "thanksForFeedback": "フィードバックありがとうございます！"
   }
 }

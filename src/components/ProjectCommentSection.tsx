@@ -17,6 +17,7 @@ interface Comment {
     display_name: string;
     handle: string;
     avatar_url: string | null;
+    user_id: string;
   };
 }
 

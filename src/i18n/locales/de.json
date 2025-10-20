@@ -12,7 +12,10 @@
     "next": "Weiter",
     "previous": "Zurück",
     "submit": "Absenden",
-    "close": "Schließen"
+    "close": "Schließen",
+    "viewAll": "Alle anzeigen",
+    "by": "von",
+    "madeBy": "Erstellt von"
   },
   "nav": {
     "home": "Startseite",
@@ -80,5 +83,100 @@
     "message": "Nachricht",
     "follow": "Folgen",
     "unfollow": "Entfolgen"
+  },
+  "project": {
+    "newProject": "Neues Projekt",
+    "editProject": "Projekt bearbeiten",
+    "createProject": "Projekt erstellen",
+    "title": "Projektname",
+    "slug": "Projekt-URL",
+    "description": "Beschreibung",
+    "technologies": "Verwendete Technologien",
+    "cover": "Titelbild",
+    "actionButton": "Aktionsschaltfläche",
+    "buttonText": "Schaltflächentext",
+    "buttonLink": "Schaltflächenlink",
+    "comments": "Kommentare",
+    "postComment": "Kommentar veröffentlichen",
+    "posting": "Wird veröffentlicht...",
+    "signInToComment": "Melden Sie sich an, um einen Kommentar zu hinterlassen",
+    "noComments": "Noch keine Kommentare. Seien Sie der Erste, der kommentiert!",
+    "shareThoughts": "Teilen Sie Ihre Gedanken...",
+    "commentPosted": "Kommentar veröffentlicht!",
+    "commentUpdated": "Kommentar aktualisiert",
+    "commentDeleted": "Kommentar gelöscht"
+  },
+  "service": {
+    "newService": "Neuer Dienst",
+    "editService": "Dienst bearbeiten",
+    "browseServices": "Dienste durchsuchen",
+    "description": "Engagieren Sie talentierte Profis für Ihr nächstes Projekt",
+    "listService": "Dienst auflisten",
+    "category": "Kategorie",
+    "pricing": "Preisgestaltung",
+    "deliveryTime": "Lieferzeit",
+    "delivery": "Lieferung",
+    "features": "Funktionen",
+    "requirements": "Anforderungen",
+    "contactMethods": "Kontaktmethoden",
+    "paymentMethods": "Zahlungsmethoden",
+    "requestService": "Dienst anfragen",
+    "noServices": "Keine Dienste gefunden. Versuchen Sie, Ihre Filter anzupassen.",
+    "loading": "Dienste werden geladen...",
+    "search": "Dienste suchen",
+    "searchPlaceholder": "Nach Titel oder Beschreibung suchen...",
+    "allCategories": "Alle Kategorien",
+    "popular": "Beliebt"
+  },
+  "people": {
+    "title": "Personen entdecken",
+    "description": "Verbinden Sie sich mit talentierten Kreativen und Mitarbeitern",
+    "searchPeople": "Personen suchen...",
+    "searchPlaceholder": "Nach Name, Handle oder Fähigkeiten suchen...",
+    "hireableOnly": "Nur zum Einstellen verfügbar",
+    "noResults": "Keine Profile gefunden. Versuchen Sie, Ihre Filter anzupassen.",
+    "loading": "Profile werden geladen..."
+  },
+  "explore": {
+    "title": "Projekte erkunden",
+    "description": "Entdecken Sie erstaunliche Arbeiten von talentierten Kreativen",
+    "latestProjects": "Neueste Projekte",
+    "noProjects": "Keine Projekte gefunden. Versuchen Sie, Ihre Filter anzupassen.",
+    "loading": "Projekte werden geladen...",
+    "search": "Suchen",
+    "searchPlaceholder": "Projekte suchen...",
+    "techStack": "Tech-Stack",
+    "techStackPlaceholder": "Nach Technologie filtern...",
+    "hireableCreators": "Nur zum Einstellen verfügbare Kreative"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "markAllRead": "Alle als gelesen markieren",
+    "noNotifications": "Keine Benachrichtigungen",
+    "newMessage": "Neue Nachricht",
+    "newFollower": "Neuer Follower",
+    "announcement": "Ankündigung"
+  },
+  "admin": {
+    "title": "Admin-Panel",
+    "reports": "Meldungen",
+    "warnings": "Warnungen",
+    "bans": "Verbannungen",
+    "roles": "Rollen",
+    "announcements": "Ankündigungen",
+    "users": "Benutzer",
+    "moderation": "Moderation",
+    "accessDenied": "Zugriff verweigert",
+    "noPermission": "Sie haben keine Berechtigung, auf diese Seite zuzugreifen.",
+    "feedback": "Feedback"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "submitFeedback": "Feedback senden",
+    "bugReport": "Fehlerbericht",
+    "featureRequest": "Funktionswunsch",
+    "other": "Sonstiges",
+    "description": "Beschreibung",
+    "thanksForFeedback": "Vielen Dank für Ihr Feedback!"
   }
 }

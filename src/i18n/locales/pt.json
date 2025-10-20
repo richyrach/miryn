@@ -12,7 +12,10 @@
     "next": "Próximo",
     "previous": "Anterior",
     "submit": "Enviar",
-    "close": "Fechar"
+    "close": "Fechar",
+    "viewAll": "Ver tudo",
+    "by": "por",
+    "madeBy": "Feito por"
   },
   "nav": {
     "home": "Início",
@@ -80,5 +83,100 @@
     "message": "Mensagem",
     "follow": "Seguir",
     "unfollow": "Deixar de seguir"
+  },
+  "project": {
+    "newProject": "Novo projeto",
+    "editProject": "Editar projeto",
+    "createProject": "Criar projeto",
+    "title": "Nome do projeto",
+    "slug": "URL do projeto",
+    "description": "Descrição",
+    "technologies": "Tecnologias utilizadas",
+    "cover": "Imagem de capa",
+    "actionButton": "Botão de ação",
+    "buttonText": "Texto do botão",
+    "buttonLink": "Link do botão",
+    "comments": "Comentários",
+    "postComment": "Publicar comentário",
+    "posting": "Publicando...",
+    "signInToComment": "Faça login para deixar um comentário",
+    "noComments": "Ainda não há comentários. Seja o primeiro a comentar!",
+    "shareThoughts": "Compartilhe seus pensamentos...",
+    "commentPosted": "Comentário publicado!",
+    "commentUpdated": "Comentário atualizado",
+    "commentDeleted": "Comentário excluído"
+  },
+  "service": {
+    "newService": "Novo serviço",
+    "editService": "Editar serviço",
+    "browseServices": "Navegar serviços",
+    "description": "Contrate profissionais talentosos para seu próximo projeto",
+    "listService": "Listar serviço",
+    "category": "Categoria",
+    "pricing": "Preço",
+    "deliveryTime": "Prazo de entrega",
+    "delivery": "entrega",
+    "features": "Recursos",
+    "requirements": "Requisitos",
+    "contactMethods": "Métodos de contato",
+    "paymentMethods": "Métodos de pagamento",
+    "requestService": "Solicitar serviço",
+    "noServices": "Nenhum serviço encontrado. Tente ajustar seus filtros.",
+    "loading": "Carregando serviços...",
+    "search": "Buscar serviços",
+    "searchPlaceholder": "Buscar por título ou descrição...",
+    "allCategories": "Todas as categorias",
+    "popular": "Popular"
+  },
+  "people": {
+    "title": "Descobrir pessoas",
+    "description": "Conecte-se com criadores e colaboradores talentosos",
+    "searchPeople": "Buscar pessoas...",
+    "searchPlaceholder": "Buscar por nome, usuário ou habilidades...",
+    "hireableOnly": "Apenas disponíveis para contratação",
+    "noResults": "Nenhum perfil encontrado. Tente ajustar seus filtros.",
+    "loading": "Carregando perfis..."
+  },
+  "explore": {
+    "title": "Explorar projetos",
+    "description": "Descubra trabalhos incríveis de criadores talentosos",
+    "latestProjects": "Projetos recentes",
+    "noProjects": "Nenhum projeto encontrado. Tente ajustar seus filtros.",
+    "loading": "Carregando projetos...",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar projetos...",
+    "techStack": "Stack de tecnologia",
+    "techStackPlaceholder": "Filtrar por tecnologia...",
+    "hireableCreators": "Apenas criadores disponíveis para contratação"
+  },
+  "notifications": {
+    "title": "Notificações",
+    "markAllRead": "Marcar todas como lidas",
+    "noNotifications": "Sem notificações",
+    "newMessage": "Nova mensagem",
+    "newFollower": "Novo seguidor",
+    "announcement": "Anúncio"
+  },
+  "admin": {
+    "title": "Painel de administração",
+    "reports": "Relatórios",
+    "warnings": "Avisos",
+    "bans": "Banimentos",
+    "roles": "Funções",
+    "announcements": "Anúncios",
+    "users": "Usuários",
+    "moderation": "Moderação",
+    "accessDenied": "Acesso negado",
+    "noPermission": "Você não tem permissão para acessar esta página.",
+    "feedback": "Feedback"
+  },
+  "feedback": {
+    "title": "Feedback",
+    "submitFeedback": "Enviar feedback",
+    "bugReport": "Relatar bug",
+    "featureRequest": "Solicitar recurso",
+    "other": "Outro",
+    "description": "Descrição",
+    "thanksForFeedback": "Obrigado pelo seu feedback!"
   }
 }

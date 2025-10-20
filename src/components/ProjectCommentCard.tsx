@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Pencil, Trash2, Check, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { VerifiedCheckmark } from "./VerifiedCheckmark";
+import { useUserRoles } from "@/hooks/useUserRoles";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +29,7 @@ interface ProjectCommentCardProps {
       display_name: string;
       handle: string;
       avatar_url: string | null;
+      user_id: string;
     };
   };
   currentUserId: string | null;
@@ -44,6 +47,7 @@ export const ProjectCommentCard = ({
 }: ProjectCommentCardProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(comment.content);
+  const { roles } = useUserRoles(comment.profiles.user_id);
 
   const isOwner = currentUserId === comment.user_id;
 
@@ -70,7 +74,10 @@ export const ProjectCommentCard = ({
             </AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-medium">{comment.profiles.display_name}</p>
+            <div className="flex items-center gap-2">
+              <p className="font-medium">{comment.profiles.display_name}</p>
+              <VerifiedCheckmark roles={roles} size="sm" />
+            </div>
             <p className="text-sm text-muted-foreground">
               @{comment.profiles.handle}
             </p>
