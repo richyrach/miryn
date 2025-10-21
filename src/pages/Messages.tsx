@@ -1,12 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/Navbar";
 import { ConversationList } from "@/components/ConversationList";
 import { ChatWindow } from "@/components/ChatWindow";
 import { MessageCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { useSearchParams } from "react-router-dom";
 
 const Messages = () => {
+  const [searchParams] = useSearchParams();
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
+
+  useEffect(() => {
+    const conversationId = searchParams.get('conversation');
+    if (conversationId) {
+      setSelectedConversation(conversationId);
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen">
