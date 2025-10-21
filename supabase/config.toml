@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-email-change-notification]
 verify_jwt = false
+
+[functions.start-conversation]
+verify_jwt = true

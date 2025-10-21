@@ -27,48 +27,25 @@ export const MessageButton = ({ targetUserId }: MessageButtonProps) => {
         return;
       }
 
-      // Find existing conversation between the two users
-      const { data: existingConversations } = await supabase
-        .from('conversation_participants')
-        .select('conversation_id')
-        .eq('user_id', user.id);
-
-      if (existingConversations) {
-        for (const conv of existingConversations) {
-          const { data: targetParticipant } = await supabase
-            .from('conversation_participants')
-            .select('conversation_id')
-            .eq('conversation_id', conv.conversation_id)
-            .eq('user_id', targetUserId)
-            .single();
-
-          if (targetParticipant) {
-            navigate(`/messages?conversation=${conv.conversation_id}`);
-            return;
-          }
-        }
+      // Validate targetUserId format
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(targetUserId)) {
+        toast({
+          title: "Error",
+          description: "Invalid user ID",
+          variant: "destructive",
+        });
+        return;
       }
 
-      // Create new conversation
-      const { data: newConversation, error: convError } = await supabase
-        .from('conversations')
-        .insert({})
-        .select()
-        .single();
+      // Call backend function to start conversation
+      const { data, error } = await supabase.functions.invoke('start-conversation', {
+        body: { targetUserId }
+      });
 
-      if (convError) throw convError;
+      if (error) throw error;
 
-      // Add both participants
-      const { error: participantsError } = await supabase
-        .from('conversation_participants')
-        .insert([
-          { conversation_id: newConversation.id, user_id: user.id },
-          { conversation_id: newConversation.id, user_id: targetUserId }
-        ]);
-
-      if (participantsError) throw participantsError;
-
-      navigate(`/messages?conversation=${newConversation.id}`);
+      navigate(`/messages?conversation=${data.conversationId}`);
     } catch (error) {
       console.error('Error creating conversation:', error);
       toast({
