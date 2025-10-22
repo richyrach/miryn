@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,12 +6,51 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Mail, RefreshCw } from "lucide-react";
 
+const RESEND_COOLDOWN = 60; // 60 seconds
+
 const VerifyEmail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [sending, setSending] = useState(false);
+  const [email, setEmail] = useState("");
+  const [countdown, setCountdown] = useState(0);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user?.email) {
+        setEmail(user.email);
+        
+        // Check if user is already verified
+        if (user.email_confirmed_at) {
+          navigate("/onboarding");
+        }
+      } else {
+        navigate("/auth");
+      }
+    };
+    fetchUser();
+
+    // Check for existing cooldown
+    const lastSent = localStorage.getItem("email_verification_last_sent");
+    if (lastSent) {
+      const elapsed = Math.floor((Date.now() - parseInt(lastSent)) / 1000);
+      if (elapsed < RESEND_COOLDOWN) {
+        setCountdown(RESEND_COOLDOWN - elapsed);
+      }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   const handleResendEmail = async () => {
+    if (countdown > 0) return;
+
     setSending(true);
     
     const { data: { user } } = await supabase.auth.getUser();
@@ -23,6 +62,24 @@ const VerifyEmail = () => {
         variant: "destructive"
       });
       navigate("/auth");
+      return;
+    }
+
+    // Call edge function to check rate limit
+    const { data: rateLimitData, error: rateLimitError } = await supabase.functions.invoke(
+      'check-email-rate-limit',
+      {
+        body: { emailType: 'verification' }
+      }
+    );
+
+    if (rateLimitError || !rateLimitData?.allowed) {
+      toast({
+        title: "Too many requests",
+        description: rateLimitData?.message || "Please wait before requesting another email.",
+        variant: "destructive"
+      });
+      setSending(false);
       return;
     }
 
@@ -42,6 +99,10 @@ const VerifyEmail = () => {
         title: "Email sent!",
         description: "Please check your inbox for the verification link.",
       });
+      
+      // Set cooldown
+      localStorage.setItem("email_verification_last_sent", Date.now().toString());
+      setCountdown(RESEND_COOLDOWN);
     }
 
     setSending(false);
@@ -60,8 +121,16 @@ const VerifyEmail = () => {
             
             <h1 className="text-3xl font-bold mb-4">Check your email</h1>
             
-            <p className="text-muted-foreground mb-6">
-              We've sent you a verification link. Please check your inbox and click the link to verify your email address.
+            <p className="text-muted-foreground mb-4">
+              We've sent a verification link to:
+            </p>
+            
+            <div className="bg-primary/10 rounded-lg p-3 mb-6">
+              <p className="text-sm font-medium">{email}</p>
+            </div>
+            
+            <p className="text-muted-foreground text-sm mb-6">
+              Please check your inbox and click the link to verify your email address.
             </p>
             
             <div className="bg-muted/30 rounded-lg p-4 mb-6">
@@ -72,7 +141,7 @@ const VerifyEmail = () => {
 
             <Button
               onClick={handleResendEmail}
-              disabled={sending}
+              disabled={sending || countdown > 0}
               variant="outline"
               className="w-full"
             >
@@ -80,6 +149,11 @@ const VerifyEmail = () => {
                 <>
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                   Sending...
+                </>
+              ) : countdown > 0 ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Resend in {countdown}s
                 </>
               ) : (
                 <>

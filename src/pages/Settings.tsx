@@ -17,6 +17,7 @@ import { SocialLinksManager } from "@/components/SocialLinksManager";
 import { CustomLinksManager } from "@/components/CustomLinksManager";
 import { PrivacySettings } from "@/components/PrivacySettings";
 import { LanguageSelector } from "@/components/LanguageSelector";
+import { TwoFactorSettings } from "@/components/TwoFactorSettings";
 
 const profileSchema = z.object({
   display_name: z.string().trim().min(1, "Display name is required").max(100, "Display name must be less than 100 characters"),
@@ -618,6 +619,11 @@ const Settings = () => {
           <div className="glass-card rounded-2xl p-8 mt-8">
             <h2 className="text-2xl font-semibold mb-4">Preferences</h2>
             <LanguageSelector />
+          </div>
+
+          {/* Two-Factor Authentication Section */}
+          <div className="glass-card rounded-2xl p-8 mt-8">
+            <TwoFactorSettings />
           </div>
 
           {/* Privacy Settings Section */}

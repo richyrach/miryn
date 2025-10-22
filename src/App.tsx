@@ -9,6 +9,7 @@ import { ConsentManager } from "@/components/ConsentManager";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import VerifyEmail from "./pages/VerifyEmail";
+import VerifyMFA from "./pages/VerifyMFA";
 import ResetPassword from "./pages/ResetPassword";
 import Explore from "./pages/Explore";
 import People from "./pages/People";
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/login" element={<Auth />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
+              <Route path="/verify-mfa" element={<VerifyMFA />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/recover-account" element={<RecoverAccount />} />
               <Route path="/explore" element={<Explore />} />

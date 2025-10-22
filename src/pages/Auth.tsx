@@ -56,8 +56,12 @@ const Auth = () => {
         variant: "destructive" 
       });
     } else {
-      toast({ title: "Account created!", description: "You're all set—no email verification needed.", duration: 6000 });
-      setTimeout(() => navigate("/onboarding"), 800);
+      toast({ 
+        title: "Account created!", 
+        description: "Please check your email to verify your account.", 
+        duration: 6000 
+      });
+      setTimeout(() => navigate("/verify-email"), 800);
     }
 
     setLoading(false);
@@ -71,7 +75,7 @@ const Auth = () => {
     const email = formData.get("signin-email") as string;
     const password = formData.get("signin-password") as string;
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       toast({ 
@@ -80,8 +84,14 @@ const Auth = () => {
         variant: "destructive" 
       });
     } else {
-      toast({ title: "Welcome back!" });
-      navigate("/settings");
+      // Check if MFA is required
+      const factors = await supabase.auth.mfa.listFactors();
+      if (factors.data?.totp && factors.data.totp.length > 0) {
+        navigate("/verify-mfa", { state: { from: "/settings" } });
+      } else {
+        toast({ title: "Welcome back!" });
+        navigate("/settings");
+      }
     }
 
     setLoading(false);

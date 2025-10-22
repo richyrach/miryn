@@ -124,6 +124,54 @@ export type Database = {
         }
         Relationships: []
       }
+      email_rate_limits: {
+        Row: {
+          email_address: string | null
+          email_type: string
+          id: string
+          ip_address: string | null
+          sent_at: string
+          user_id: string | null
+        }
+        Insert: {
+          email_address?: string | null
+          email_type: string
+          id?: string
+          ip_address?: string | null
+          sent_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          email_address?: string | null
+          email_type?: string
+          id?: string
+          ip_address?: string | null
+          sent_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      failed_mfa_attempts: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip_address: string | null
+          user_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           created_at: string
@@ -221,6 +269,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      mfa_backup_codes: {
+        Row: {
+          code_hash: string
+          created_at: string
+          id: string
+          used_at: string | null
+          user_id: string
+        }
+        Insert: {
+          code_hash: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id: string
+        }
+        Update: {
+          code_hash?: string
+          created_at?: string
+          id?: string
+          used_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
