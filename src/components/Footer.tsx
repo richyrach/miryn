@@ -24,7 +24,7 @@ export const Footer = () => {
 
           {/* Partnership Section */}
           <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-foreground">Powered By</h3>
+            <h3 className="text-sm font-semibold text-foreground">Partners</h3>
             <a 
               href="https://top.gg/bot/1414363169761132676" 
               target="_blank" 
