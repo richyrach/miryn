@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Sparkles, Users, Rocket, TrendingUp, Briefcase } from "lucide-react";
 import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
 import { StatsCounter } from "@/components/StatsCounter";
 import { ProjectCard } from "@/components/ProjectCard";
 import { ServiceCard } from "@/components/ServiceCard";
@@ -276,6 +277,7 @@ const Home = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

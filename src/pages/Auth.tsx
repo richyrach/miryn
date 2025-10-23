@@ -192,6 +192,20 @@ const Auth = () => {
                       At least 8 characters
                     </p>
                   </div>
+                  <div className="flex items-start gap-2 p-3 rounded-lg bg-muted/30 border border-border/40">
+                    <input
+                      type="checkbox"
+                      id="age-confirmation"
+                      name="age-confirmation"
+                      required
+                      className="mt-1"
+                    />
+                    <label htmlFor="age-confirmation" className="text-xs text-muted-foreground cursor-pointer">
+                      I confirm I am 13 years of age or older (16+ for EU users). By signing up, I agree to Miryn's{" "}
+                      <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and{" "}
+                      <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+                    </label>
+                  </div>
                   <Button type="submit" className="w-full btn-hero" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>

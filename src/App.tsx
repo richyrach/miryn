@@ -28,6 +28,7 @@ import EditService from "./pages/EditService";
 import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
 import Warning from "./pages/Warning";
 import Banned from "./pages/Banned";
 import Feedback from "./pages/Feedback";
@@ -69,6 +70,7 @@ const App = () => (
               <Route path="/services/:serviceId/edit" element={<EditService />} />
               <Route path="/service-requests" element={<ServiceRequests />} />
               <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
               <Route path="/feedback" element={<Feedback />} />
               <Route path="/:handle" element={<Profile />} />
               <Route path="/:handle/:projectSlug" element={<Project />} />
