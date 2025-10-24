@@ -489,6 +489,7 @@ export type Database = {
           cover_url: string | null
           created_at: string
           ctas: Json | null
+          gallery_images: Json | null
           id: string
           outcomes: Json | null
           owner_id: string
@@ -503,6 +504,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           ctas?: Json | null
+          gallery_images?: Json | null
           id?: string
           outcomes?: Json | null
           owner_id: string
@@ -517,6 +519,7 @@ export type Database = {
           cover_url?: string | null
           created_at?: string
           ctas?: Json | null
+          gallery_images?: Json | null
           id?: string
           outcomes?: Json | null
           owner_id?: string
@@ -964,30 +967,15 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
-      get_follower_count: {
-        Args: { target_user_id: string }
-        Returns: number
-      }
-      get_following_count: {
-        Args: { target_user_id: string }
-        Returns: number
-      }
+      get_follower_count: { Args: { target_user_id: string }; Returns: number }
+      get_following_count: { Args: { target_user_id: string }; Returns: number }
       get_project_reaction_count: {
         Args: { target_project_id: string }
         Returns: number
       }
-      get_warning_count: {
-        Args: { target_user_id: string }
-        Returns: number
-      }
-      has_moderation: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      has_premium: {
-        Args: { target_user_id: string }
-        Returns: boolean
-      }
+      get_warning_count: { Args: { target_user_id: string }; Returns: number }
+      has_moderation: { Args: { _user_id: string }; Returns: boolean }
+      has_premium: { Args: { target_user_id: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -995,24 +983,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_support: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
-      is_admin: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      has_support: { Args: { _user_id: string }; Returns: boolean }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       is_ban_active: {
         Args: {
           ban_record: Database["public"]["Tables"]["banned_users"]["Row"]
         }
         Returns: boolean
       }
-      is_banned: {
-        Args: { _user_id: string }
-        Returns: boolean
-      }
+      is_banned: { Args: { _user_id: string }; Returns: boolean }
       is_following: {
         Args: { follower: string; following: string }
         Returns: boolean

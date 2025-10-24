@@ -26,6 +26,7 @@ const NewProject = () => {
   const [uploading, setUploading] = useState(false);
   const [coverUrl, setCoverUrl] = useState('');
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [galleryImages, setGalleryImages] = useState<Array<{url: string; caption: string; order: number}>>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {

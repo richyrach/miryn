@@ -57,9 +57,16 @@ export const TwoFactorSettings = () => {
       if (data) {
         setSecret(data.totp.secret);
         
-        // Generate QR code
-        const qrCodeUrl = data.totp.qr_code;
-        const qr = await QRCode.toDataURL(qrCodeUrl);
+        // Get user email for QR code
+        const { data: { user } } = await supabase.auth.getUser();
+        const userEmail = user?.email || 'user';
+        
+        // Create shorter URI to avoid "data too big" error
+        // Format: otpauth://totp/Miryn:email?secret=SECRET&issuer=Miryn
+        const otpAuthUri = `otpauth://totp/Miryn:${userEmail}?secret=${data.totp.secret}&issuer=Miryn`;
+        
+        // Generate QR code from the shorter URI
+        const qr = await QRCode.toDataURL(otpAuthUri);
         setQrCode(qr);
 
         // Generate backup codes
