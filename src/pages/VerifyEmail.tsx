@@ -4,7 +4,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
-import { Mail, RefreshCw } from "lucide-react";
+import { Mail, RefreshCw, KeyRound } from "lucide-react";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 
 const RESEND_COOLDOWN = 60; // 60 seconds
 
@@ -14,6 +19,8 @@ const VerifyEmail = () => {
   const [sending, setSending] = useState(false);
   const [email, setEmail] = useState("");
   const [countdown, setCountdown] = useState(0);
+  const [otp, setOtp] = useState("");
+  const [verifying, setVerifying] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -30,6 +37,15 @@ const VerifyEmail = () => {
       }
     };
     fetchUser();
+
+    // Listen for auth state changes to catch email verification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
+        navigate("/onboarding");
+      }
+    });
+
+    return () => subscription.unsubscribe();
 
     // Check for existing cooldown
     const lastSent = localStorage.getItem("email_verification_last_sent");
@@ -108,6 +124,42 @@ const VerifyEmail = () => {
     setSending(false);
   };
 
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: "Invalid code",
+        description: "Please enter the 6-digit code from your email.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setVerifying(true);
+    
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otp,
+      type: 'email'
+    });
+
+    if (error) {
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired code. Please try again.",
+        variant: "destructive"
+      });
+      setOtp("");
+    } else {
+      toast({
+        title: "Email verified!",
+        description: "Redirecting to onboarding...",
+      });
+      setTimeout(() => navigate("/onboarding"), 1000);
+    }
+
+    setVerifying(false);
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -134,9 +186,42 @@ const VerifyEmail = () => {
             </p>
             
             <div className="bg-muted/30 rounded-lg p-4 mb-6">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-4">
                 Don't see the email? Check your spam folder or request a new one below.
               </p>
+              
+              <div className="border-t border-border pt-4">
+                <p className="text-sm font-medium mb-3 flex items-center justify-center gap-2">
+                  <KeyRound className="w-4 h-4" />
+                  Or enter the 6-digit code from your email
+                </p>
+                
+                <div className="flex flex-col items-center gap-3">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    disabled={verifying}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                  
+                  <Button
+                    onClick={handleVerifyOtp}
+                    disabled={verifying || otp.length !== 6}
+                    className="w-full"
+                  >
+                    {verifying ? "Verifying..." : "Verify Code"}
+                  </Button>
+                </div>
+              </div>
             </div>
 
             <Button

@@ -22,15 +22,40 @@ const Onboarding = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [currentHandle, setCurrentHandle] = useState<string>("");
+  const [isPlaceholder, setIsPlaceholder] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session) {
-        navigate("/login");
-      } else {
-        setUserId(session.user.id);
+        navigate("/auth");
+        return;
       }
-    });
+      
+      setUserId(session.user.id);
+      
+      // Check if user has a placeholder handle
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("handle")
+        .eq("user_id", session.user.id)
+        .single();
+      
+      if (profile?.handle) {
+        setCurrentHandle(profile.handle);
+        // If handle starts with "temp_", it's a placeholder
+        if (profile.handle.startsWith("temp_")) {
+          setIsPlaceholder(true);
+        } else {
+          // User already completed onboarding
+          navigate("/settings");
+        }
+      }
+    };
+    
+    checkSession();
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -96,7 +121,7 @@ const Onboarding = () => {
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold mb-2">Welcome to Miryn!</h1>
-            <p className="text-muted-foreground">Let's set up your profile</p>
+            <p className="text-muted-foreground">Let's set up your profile and choose your username</p>
           </div>
 
           <div className="glass-card rounded-2xl p-8">
@@ -112,6 +137,7 @@ const Onboarding = () => {
                   title="3-20 characters, lowercase letters and numbers only"
                   className="mt-1"
                   maxLength={20}
+                  defaultValue={isPlaceholder ? "" : currentHandle}
                   onChange={(e) => {
                     e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
                   }}
@@ -119,6 +145,11 @@ const Onboarding = () => {
                 <p className="text-xs text-muted-foreground mt-1">
                   Your profile will be at miryn.app/@{"{username}"}. Only lowercase letters and numbers.
                 </p>
+                {isPlaceholder && (
+                  <p className="text-xs text-amber-500 mt-1">
+                    Please choose your permanent username
+                  </p>
+                )}
               </div>
 
               <div>
