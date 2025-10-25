@@ -103,20 +103,24 @@ const VerifyMFA = () => {
 
         navigate(location.state?.from || "/");
       } else {
-        // Verify TOTP code
+        // Verify TOTP code - use any available TOTP factor
         const factors = await supabase.auth.mfa.listFactors();
-        const factorId = factors.data?.totp?.[0]?.id;
+        const totpFactors = factors.data?.totp || [];
 
-        if (!factorId) throw new Error("No MFA factor found");
+        if (totpFactors.length === 0) {
+          throw new Error("No 2FA method found. Please use a backup code or contact support.");
+        }
+        
+        const verifiedFactor = totpFactors[0];
 
         const challenge = await supabase.auth.mfa.challenge({
-          factorId,
+          factorId: verifiedFactor.id,
         });
 
         if (challenge.error) throw challenge.error;
 
         const { error } = await supabase.auth.mfa.verify({
-          factorId,
+          factorId: verifiedFactor.id,
           challengeId: challenge.data.id,
           code,
         });

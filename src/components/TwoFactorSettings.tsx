@@ -43,16 +43,78 @@ export const TwoFactorSettings = () => {
     return codes;
   };
 
+  const unenrollUnverifiedTotp = async () => {
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      const unverifiedFactors = factors.data?.totp?.filter(f => f.factor_type === 'totp' && !f.friendly_name) || [];
+      
+      for (const factor of unverifiedFactors) {
+        await supabase.auth.mfa.unenroll({ factorId: factor.id });
+      }
+    } catch (error) {
+      console.error("Error cleaning up unverified factors:", error);
+    }
+  };
+
+  const unenrollAllTotp = async () => {
+    try {
+      const factors = await supabase.auth.mfa.listFactors();
+      const allFactors = factors.data?.totp || [];
+      
+      for (const factor of allFactors) {
+        await supabase.auth.mfa.unenroll({ factorId: factor.id });
+      }
+
+      // Delete all backup codes
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('mfa_backup_codes').delete().eq('user_id', user.id);
+      }
+    } catch (error) {
+      console.error("Error resetting 2FA:", error);
+      throw error;
+    }
+  };
+
   const handleEnableMfa = async () => {
     setLoading(true);
     setEnrolling(true);
 
     try {
+      // First, cleanup any unverified factors to prevent conflicts
+      await unenrollUnverifiedTotp();
+
       const { data, error } = await supabase.auth.mfa.enroll({
         factorType: 'totp',
       });
 
-      if (error) throw error;
+      if (error) {
+        // If we still get a conflict, try full cleanup and retry
+        if (error.message?.includes('friendly name')) {
+          await unenrollUnverifiedTotp();
+          const retryResult = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+          if (retryResult.error) throw retryResult.error;
+          if (!retryResult.data) throw new Error("Failed to enroll");
+          
+          // Use retry data
+          setSecret(retryResult.data.totp.secret);
+          const { data: { user } } = await supabase.auth.getUser();
+          const userEmail = user?.email || 'user';
+          const otpAuthUri = `otpauth://totp/Miryn:${userEmail}?secret=${retryResult.data.totp.secret}&issuer=Miryn`;
+          const qr = await QRCode.toDataURL(otpAuthUri);
+          setQrCode(qr);
+          const codes = generateBackupCodes();
+          setBackupCodes(codes);
+          
+          toast({
+            title: "Scan QR code",
+            description: "Use your authenticator app to scan the QR code",
+          });
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
 
       if (data) {
         setSecret(data.totp.secret);
@@ -103,13 +165,26 @@ export const TwoFactorSettings = () => {
     setLoading(true);
 
     try {
+      // Get the most recently enrolled factor (last in array)
       const factors = await supabase.auth.mfa.listFactors();
-      const factorId = factors.data?.totp?.[0]?.id;
+      const totpFactors = factors.data?.totp || [];
 
-      if (!factorId) throw new Error("No factor found");
+      if (totpFactors.length === 0) throw new Error("No factor found");
+      
+      // Use the most recent factor (likely the one we just enrolled)
+      const factorToVerify = totpFactors[totpFactors.length - 1];
 
-      const { error } = await supabase.auth.mfa.challengeAndVerify({
-        factorId,
+      // Create a challenge for this specific factor
+      const challenge = await supabase.auth.mfa.challenge({
+        factorId: factorToVerify.id,
+      });
+
+      if (challenge.error) throw challenge.error;
+
+      // Verify the code with the challenge
+      const { error } = await supabase.auth.mfa.verify({
+        factorId: factorToVerify.id,
+        challengeId: challenge.data.id,
         code: verificationCode,
       });
 
@@ -140,8 +215,39 @@ export const TwoFactorSettings = () => {
       setVerificationCode("");
     } catch (error: any) {
       toast({
+        title: "Invalid code",
+        description: "Code rejected. Ensure your device time is auto-synced.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetMfa = async () => {
+    if (!confirm("This will remove ALL 2FA settings and invalidate codes in your authenticator app. Continue?")) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await unenrollAllTotp();
+      
+      toast({
+        title: "2FA Reset",
+        description: "All authenticator entries are now invalid. Delete them from your app.",
+      });
+
+      setMfaEnabled(false);
+      setEnrolling(false);
+      setQrCode("");
+      setSecret("");
+      setVerificationCode("");
+      setBackupCodes([]);
+    } catch (error: any) {
+      toast({
         title: "Error",
-        description: "Invalid verification code",
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -293,7 +399,8 @@ export const TwoFactorSettings = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
+                  onClick={async () => {
+                    await unenrollUnverifiedTotp();
                     setEnrolling(false);
                     setQrCode("");
                     setSecret("");
@@ -303,6 +410,12 @@ export const TwoFactorSettings = () => {
                 >
                   Cancel
                 </Button>
+              </div>
+              
+              <div className="bg-muted/30 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">
+                  💡 <strong>Tip:</strong> If codes keep failing, ensure automatic date/time is enabled on your device. Cancel will clean up this setup attempt.
+                </p>
               </div>
             </div>
           </div>
@@ -319,13 +432,31 @@ export const TwoFactorSettings = () => {
                 Your account is protected with two-factor authentication
               </p>
             </div>
-            <Button
-              variant="destructive"
-              onClick={handleDisableMfa}
-              disabled={loading}
-            >
-              Disable Two-Factor Authentication
-            </Button>
+            
+            <div className="flex gap-2">
+              <Button
+                variant="destructive"
+                onClick={handleDisableMfa}
+                disabled={loading}
+                className="flex-1"
+              >
+                Disable 2FA
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleResetMfa}
+                disabled={loading}
+                className="flex-1"
+              >
+                Reset 2FA Setup
+              </Button>
+            </div>
+            
+            <div className="bg-muted/30 rounded-lg p-3">
+              <p className="text-xs text-muted-foreground">
+                <strong>Reset 2FA Setup</strong> removes all authenticator entries and backup codes. Use if you lost access to your device or need to start fresh.
+              </p>
+            </div>
           </div>
         )}
       </CardContent>
