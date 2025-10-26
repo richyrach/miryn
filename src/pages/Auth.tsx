@@ -58,10 +58,10 @@ const Auth = () => {
     } else {
       toast({ 
         title: "Account created!", 
-        description: "Please check your email to verify your account.", 
-        duration: 6000 
+        description: "Welcome to Miryn! Let's set up your profile.", 
+        duration: 3000 
       });
-      setTimeout(() => navigate("/verify-email"), 800);
+      setTimeout(() => navigate("/onboarding"), 500);
     }
 
     setLoading(false);

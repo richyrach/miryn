@@ -344,6 +344,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_type: string | null
           avatar_url: string | null
           banner_url: string | null
           bio: string | null
@@ -358,6 +359,8 @@ export type Database = {
           preferences: Json | null
           primary_cta: string | null
           primary_cta_url: string | null
+          professional_enabled_at: string | null
+          professional_onboarding_completed: boolean | null
           profile_layout: string | null
           skills: string[] | null
           social_links: Json | null
@@ -366,6 +369,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          account_type?: string | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
@@ -380,6 +384,8 @@ export type Database = {
           preferences?: Json | null
           primary_cta?: string | null
           primary_cta_url?: string | null
+          professional_enabled_at?: string | null
+          professional_onboarding_completed?: boolean | null
           profile_layout?: string | null
           skills?: string[] | null
           social_links?: Json | null
@@ -388,6 +394,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          account_type?: string | null
           avatar_url?: string | null
           banner_url?: string | null
           bio?: string | null
@@ -402,6 +409,8 @@ export type Database = {
           preferences?: Json | null
           primary_cta?: string | null
           primary_cta_url?: string | null
+          professional_enabled_at?: string | null
+          professional_onboarding_completed?: boolean | null
           profile_layout?: string | null
           skills?: string[] | null
           social_links?: Json | null
