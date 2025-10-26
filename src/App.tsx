@@ -13,6 +13,7 @@ import VerifyMFA from "./pages/VerifyMFA";
 import ResetPassword from "./pages/ResetPassword";
 import Explore from "./pages/Explore";
 import People from "./pages/People";
+import AccountTypeSelection from "./pages/AccountTypeSelection";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
 import NewProject from "./pages/NewProject";
@@ -56,6 +57,7 @@ const App = () => (
               <Route path="/verify-mfa" element={<VerifyMFA />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/recover-account" element={<RecoverAccount />} />
+              <Route path="/account-type" element={<AccountTypeSelection />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/people" element={<People />} />
               <Route path="/onboarding" element={<Onboarding />} />
