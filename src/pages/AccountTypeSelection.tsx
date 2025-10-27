@@ -27,24 +27,54 @@ const AccountTypeSelection = () => {
         return;
       }
 
+      // Wait for profile to exist (handle race condition with trigger)
+      let retries = 0;
+      let profileExists = false;
+      
+      while (retries < 5 && !profileExists) {
+        const { data: profile, error: fetchError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile && !fetchError) {
+          profileExists = true;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retries++;
+        }
+      }
+
+      if (!profileExists) {
+        toast({
+          title: "Profile Not Ready",
+          description: "Your profile is still being set up. Please try again in a moment.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       // Update profile with account type
       const { error } = await supabase
         .from('profiles')
         .update({ 
           account_type: accountType,
-          professional_enabled_at: accountType === 'professional' ? new Date().toISOString() : null
+          professional_enabled_at: accountType === 'professional' ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
         })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      // Redirect based on account type
-      if (accountType === 'professional') {
-        navigate("/onboarding");
-      } else {
-        // Basic users go to a simplified onboarding (we'll create this)
-        navigate("/onboarding");
-      }
+      toast({
+        title: "Success",
+        description: `Account type set to ${accountType === 'professional' ? 'Creator' : 'Hire'}`
+      });
+
+      // Redirect to onboarding
+      navigate("/onboarding");
 
     } catch (error) {
       console.error("Error setting account type:", error);
@@ -53,7 +83,6 @@ const AccountTypeSelection = () => {
         description: "Failed to set account type. Please try again.",
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };
@@ -74,15 +103,47 @@ const AccountTypeSelection = () => {
         return;
       }
 
+      // Wait for profile to exist
+      let retries = 0;
+      let profileExists = false;
+      
+      while (retries < 5 && !profileExists) {
+        const { data: profile, error: fetchError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile && !fetchError) {
+          profileExists = true;
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          retries++;
+        }
+      }
+
+      if (!profileExists) {
+        toast({
+          title: "Profile Not Ready",
+          description: "Your profile is still being set up. Please try again in a moment.",
+          variant: "destructive"
+        });
+        setLoading(false);
+        return;
+      }
+
       // Set as basic by default
       const { error } = await supabase
         .from('profiles')
-        .update({ account_type: 'basic' })
+        .update({ 
+          account_type: 'basic',
+          updated_at: new Date().toISOString()
+        })
         .eq('user_id', user.id);
 
       if (error) throw error;
 
-      navigate("/");
+      navigate("/onboarding");
     } catch (error) {
       console.error("Error skipping:", error);
       toast({
@@ -90,7 +151,6 @@ const AccountTypeSelection = () => {
         description: "Failed to proceed. Please try again.",
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
     }
   };
