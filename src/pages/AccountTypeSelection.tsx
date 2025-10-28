@@ -27,7 +27,7 @@ const AccountTypeSelection = () => {
         return;
       }
 
-      // Wait for profile to exist (handle race condition with trigger)
+      // Wait for or create profile if missing
       let retries = 0;
       let profileExists = false;
       
@@ -36,24 +36,41 @@ const AccountTypeSelection = () => {
           .from('profiles')
           .select('id')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
         if (profile && !fetchError) {
           profileExists = true;
         } else {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 400));
           retries++;
         }
       }
 
       if (!profileExists) {
-        toast({
-          title: "Profile Not Ready",
-          description: "Your profile is still being set up. Please try again in a moment.",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
+        // Create minimal profile as fallback (no trigger available yet)
+        const placeholderHandle = `temp_${user.id.substring(0, 12)}`;
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert(
+            {
+              user_id: user.id,
+              handle: placeholderHandle,
+              display_name: 'New User',
+              account_type: accountType,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id' }
+          );
+
+        if (upsertError) {
+          toast({
+            title: 'Profile Not Ready',
+            description: 'We could not create your profile yet. Please try again in a moment.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
       }
 
       // Update profile with account type
@@ -103,7 +120,7 @@ const AccountTypeSelection = () => {
         return;
       }
 
-      // Wait for profile to exist
+      // Wait for or create profile if missing
       let retries = 0;
       let profileExists = false;
       
@@ -112,24 +129,41 @@ const AccountTypeSelection = () => {
           .from('profiles')
           .select('id')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
         
         if (profile && !fetchError) {
           profileExists = true;
         } else {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise((resolve) => setTimeout(resolve, 400));
           retries++;
         }
       }
 
       if (!profileExists) {
-        toast({
-          title: "Profile Not Ready",
-          description: "Your profile is still being set up. Please try again in a moment.",
-          variant: "destructive"
-        });
-        setLoading(false);
-        return;
+        // Create minimal profile as fallback (no trigger available yet)
+        const placeholderHandle = `temp_${user.id.substring(0, 12)}`;
+        const { error: upsertError } = await supabase
+          .from('profiles')
+          .upsert(
+            {
+              user_id: user.id,
+              handle: placeholderHandle,
+              display_name: 'New User',
+              account_type: 'basic',
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id' }
+          );
+
+        if (upsertError) {
+          toast({
+            title: 'Profile Not Ready',
+            description: 'We could not create your profile yet. Please try again in a moment.',
+            variant: 'destructive',
+          });
+          setLoading(false);
+          return;
+        }
       }
 
       // Set as basic by default
