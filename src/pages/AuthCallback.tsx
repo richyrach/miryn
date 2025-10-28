@@ -41,7 +41,7 @@ const AuthCallback = () => {
 
         if (isNewUser) {
           // New user - go to account type selection
-          navigate("/account-type");
+          navigate("/onboarding");
         } else {
           // Returning user - go to settings
           toast({ title: "Welcome back!" });

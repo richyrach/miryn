@@ -61,7 +61,7 @@ const Auth = () => {
         description: "Welcome to Miryn! Let's set up your profile.", 
         duration: 3000 
       });
-      setTimeout(() => navigate("/account-type"), 500);
+      setTimeout(() => navigate("/onboarding"), 500);
     }
 
     setLoading(false);
