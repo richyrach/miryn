@@ -10,6 +10,13 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Complete OAuth/email verification by exchanging code for a session if present
+        try {
+          await supabase.auth.exchangeCodeForSession(window.location.href);
+        } catch (exchangeErr) {
+          console.warn('Auth callback: no code to exchange or already exchanged', exchangeErr);
+        }
+
         // Get the current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
