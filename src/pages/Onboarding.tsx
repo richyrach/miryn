@@ -28,43 +28,42 @@ const Onboarding = () => {
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
         navigate("/auth");
         return;
       }
-      
       setUserId(session.user.id);
-      
-      // Check if user has a placeholder handle
+
+      // Check if user has a placeholder handle (handle missing is also treated as placeholder)
       const { data: profile } = await supabase
         .from("profiles")
         .select("handle")
         .eq("user_id", session.user.id)
-        .single();
-      
+        .maybeSingle();
+
       if (profile?.handle) {
         setCurrentHandle(profile.handle);
-        // If handle starts with "temp_", it's a placeholder
         if (profile.handle.startsWith("temp_")) {
           setIsPlaceholder(true);
         } else {
-          // User already completed onboarding
           navigate("/settings");
         }
+      } else {
+        // No profile yet – allow user to create one
+        setIsPlaceholder(true);
       }
     };
-    
+
     checkSession();
   }, [navigate]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!userId) return;
-    
+
     setLoading(true);
     const formData = new FormData(e.currentTarget);
-    
+
     const handle = formData.get("handle") as string;
     const displayName = formData.get("displayName") as string;
     const introUrl = formData.get("introUrl") as string;
@@ -91,17 +90,21 @@ const Onboarding = () => {
       return;
     }
 
+    // Create or update the profile atomically
+    const payload = {
+      user_id: userId,
+      handle: validationResult.data.handle,
+      display_name: validationResult.data.display_name,
+      intro_url: validationResult.data.intro_url || null,
+      primary_cta: primaryCta || null,
+      primary_cta_url: validationResult.data.primary_cta_url || null,
+      hireable,
+      updated_at: new Date().toISOString(),
+    } as const;
+
     const { error } = await supabase
       .from("profiles")
-      .update({
-        handle: validationResult.data.handle,
-        display_name: validationResult.data.display_name,
-        intro_url: validationResult.data.intro_url || null,
-        primary_cta: primaryCta || null,
-        primary_cta_url: validationResult.data.primary_cta_url || null,
-        hireable,
-      })
-      .eq("user_id", userId);
+      .upsert(payload, { onConflict: "user_id" });
 
     if (error) {
       toast({ title: "Error updating profile", description: "Unable to update profile. Please try again.", variant: "destructive" });

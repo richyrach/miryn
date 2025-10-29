@@ -52,7 +52,7 @@ export const Navbar = () => {
       .from("profiles")
       .select("handle, id")
       .eq("user_id", userId)
-      .single();
+      .maybeSingle();
     
     if (profile) {
       setHandle(profile.handle);
@@ -65,6 +65,9 @@ export const Navbar = () => {
         .eq("status", "pending");
       
       setPendingCount(count || 0);
+    } else {
+      setHandle(null);
+      setPendingCount(0);
     }
 
     // Check admin status
