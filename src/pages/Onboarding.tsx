@@ -90,7 +90,21 @@ const Onboarding = () => {
       return;
     }
 
-    // Create or update the profile atomically
+    // Ensure handle is available and then create or update the profile
+    // 1) Check handle availability (unique across all profiles)
+    const { data: existingHandle } = await supabase
+      .from("profiles")
+      .select("user_id")
+      .eq("handle", validationResult.data.handle)
+      .maybeSingle();
+
+    if (existingHandle && existingHandle.user_id !== userId) {
+      toast({ title: "Username taken", description: "Please choose another handle.", variant: "destructive" });
+      setLoading(false);
+      return;
+    }
+
+    // 2) Build payload
     const payload = {
       user_id: userId,
       handle: validationResult.data.handle,
@@ -102,13 +116,32 @@ const Onboarding = () => {
       updated_at: new Date().toISOString(),
     } as const;
 
-    const { error } = await supabase
+    // 3) Create or update explicitly (avoids onConflict edge cases)
+    const { data: existingProfile } = await supabase
       .from("profiles")
-      .upsert(payload, { onConflict: "user_id" });
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    let error = null as any;
+    if (existingProfile) {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update(payload)
+        .eq("user_id", userId);
+      error = updateError;
+    } else {
+      const { error: insertError } = await supabase
+        .from("profiles")
+        .insert(payload);
+      error = insertError;
+    }
 
     if (error) {
       toast({ title: "Error updating profile", description: "Unable to update profile. Please try again.", variant: "destructive" });
     } else {
+      // Notify other parts of the app (e.g., Navbar) to refresh user data
+      window.dispatchEvent(new Event("profile-updated"));
       toast({ title: "Profile created successfully!" });
       navigate("/settings");
     }

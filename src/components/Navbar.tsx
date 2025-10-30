@@ -46,6 +46,16 @@ export const Navbar = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Refresh navbar data when the profile is created/updated elsewhere
+  useEffect(() => {
+    const handler = () => {
+      if (user) {
+        fetchUserData(user.id);
+      }
+    };
+    window.addEventListener('profile-updated', handler);
+    return () => window.removeEventListener('profile-updated', handler);
+  }, [user]);
   const fetchUserData = async (userId: string) => {
     // Get profile handle
     const { data: profile } = await supabase
