@@ -143,7 +143,7 @@ const Onboarding = () => {
       // Notify other parts of the app (e.g., Navbar) to refresh user data
       window.dispatchEvent(new Event("profile-updated"));
       toast({ title: "Profile created successfully!" });
-      navigate("/settings");
+      navigate(`/${validationResult.data.handle}`);
     }
 
     setLoading(false);
