@@ -495,9 +495,11 @@ export type Database = {
       }
       projects: {
         Row: {
+          category: string | null
           cover_url: string | null
           created_at: string
           ctas: Json | null
+          detailed_description: string | null
           gallery_images: Json | null
           id: string
           outcomes: Json | null
@@ -506,13 +508,16 @@ export type Database = {
           slug: string
           stack: string[] | null
           summary: string | null
+          tags: string[] | null
           title: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
           cover_url?: string | null
           created_at?: string
           ctas?: Json | null
+          detailed_description?: string | null
           gallery_images?: Json | null
           id?: string
           outcomes?: Json | null
@@ -521,13 +526,16 @@ export type Database = {
           slug: string
           stack?: string[] | null
           summary?: string | null
+          tags?: string[] | null
           title: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
           cover_url?: string | null
           created_at?: string
           ctas?: Json | null
+          detailed_description?: string | null
           gallery_images?: Json | null
           id?: string
           outcomes?: Json | null
@@ -536,6 +544,7 @@ export type Database = {
           slug?: string
           stack?: string[] | null
           summary?: string | null
+          tags?: string[] | null
           title?: string
           updated_at?: string
         }

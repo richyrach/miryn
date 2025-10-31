@@ -267,6 +267,8 @@ const Profile = () => {
                     coverUrl={project.cover_url}
                     stack={project.stack}
                     ownerHandle={profile.handle}
+                    category={project.category}
+                    tags={project.tags}
                   />
                 ))}
               </div>

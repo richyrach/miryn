@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { ExternalLink, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { ReportButton } from "@/components/ReportButton";
 import { ProjectCommentSection } from "@/components/ProjectCommentSection";
+import { ProjectGallery } from "@/components/ProjectGallery";
+import { ProjectOutcomes } from "@/components/ProjectOutcomes";
+import { ProjectLinks } from "@/components/ProjectLinks";
 import { useToast } from "@/hooks/use-toast";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
 import {
@@ -130,20 +133,33 @@ const Project = () => {
             </Link>
           </Button>
 
-          {/* Project Header */}
-          {project.cover_url && (
-            <div className="aspect-video bg-muted rounded-2xl overflow-hidden mb-8">
-              <img
-                src={project.cover_url}
-                alt={project.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+          {/* Project Gallery */}
+          <ProjectGallery 
+            coverUrl={project.cover_url} 
+            galleryImages={project.gallery_images || []} 
+          />
 
           <div className="glass-card rounded-2xl p-8 mb-8">
             <div className="flex items-start justify-between mb-4">
-              <h1 className="text-4xl md:text-5xl font-bold">{project.title}</h1>
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-4xl md:text-5xl font-bold">{project.title}</h1>
+                  {project.category && (
+                    <Badge variant="secondary" className="text-sm">
+                      {project.category}
+                    </Badge>
+                  )}
+                </div>
+                {project.tags && project.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-3">
+                    {project.tags.map((tag: string, i: number) => (
+                      <Badge key={i} variant="outline" className="text-xs">
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               {isOwner && (
                 <div className="flex gap-2">
@@ -192,6 +208,15 @@ const Project = () => {
               <p className="text-lg text-foreground mb-6">{project.summary}</p>
             )}
 
+            {project.detailed_description && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-3">About This Project</h3>
+                <div className="prose prose-invert max-w-none">
+                  <p className="whitespace-pre-wrap text-muted-foreground">{project.detailed_description}</p>
+                </div>
+              </div>
+            )}
+
             {/* Tech Stack */}
             {project.stack && project.stack.length > 0 && (
               <div className="mb-6">
@@ -204,48 +229,22 @@ const Project = () => {
               </div>
             )}
 
-            {/* Outcomes */}
-            {project.outcomes && project.outcomes.length > 0 && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-3">Outcomes</h3>
-                <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {project.outcomes.map((outcome: any, i: number) => (
-                    <div key={i} className="glass-card rounded-xl p-4 text-center">
-                      <div className="text-2xl font-bold text-primary mb-1">
-                        {outcome.value}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        {outcome.label}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
-             {/* CTAs */}
-             {project.ctas && project.ctas.length > 0 && (
-               <div className="flex flex-wrap gap-3 pt-6 border-t">
-                 {project.ctas.map((cta: any, i: number) => (
-                   <Button key={i} className="btn-hero" asChild>
-                     <a href={cta.url} target="_blank" rel="noopener noreferrer">
-                       {cta.label}
-                       <ExternalLink className="w-4 h-4 ml-2" />
-                     </a>
-                   </Button>
-                 ))}
-               </div>
-             )}
+             {/* Project Links */}
+             <ProjectLinks links={project.ctas || []} />
 
              {/* Report */}
              <div className="pt-6">
                <ReportButton targetType="project" targetId={project.id} />
              </div>
+           </div>
 
-             {/* Comments Section */}
-             <div className="pt-8 border-t">
-               <ProjectCommentSection projectId={project.id} isAdmin={isAdminUser} />
-             </div>
+           {/* Project Outcomes */}
+           <ProjectOutcomes outcomes={project.outcomes || []} />
+
+           {/* Comments Section */}
+           <div className="glass-card rounded-2xl p-8">
+             <ProjectCommentSection projectId={project.id} isAdmin={isAdminUser} />
            </div>
         </div>
       </main>
