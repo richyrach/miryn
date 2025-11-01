@@ -23,7 +23,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const siteUrl = Deno.env.get("VITE_SUPABASE_URL")?.replace('supabase.co', 'lovableproject.com') || 'https://miryn.space';
+    const siteUrl == Deno.env.get("SITE_URL") || 'https://miryn.vercel.app'ace';
     
     // Create HTML email
     const html = `
