@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+eimport { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -75,6 +75,13 @@ const Settings = () => {
       if (data.banner_url) setBannerPreview(data.banner_url);
     }
   };
+
+  // Redirect to onboarding if profile is missing after loading
+useEffect(() => {
+    if (!loading && profile === null) {
+      navigate('/onboarding');
+    }
+  }, [loading, profile, navigate]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
