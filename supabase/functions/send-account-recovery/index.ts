@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
-import { Resend } from "https://esm.sh/resend@2.0.0";
+.import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -65,7 +65,7 @@ serve(async (req: Request): Promise<Response> => {
       );
     }
 
-    const siteUrl = Deno.env.get("VITE_SUPABASE_URL")?.replace('supabase.co', 'lovableproject.com') || 'https://miryn.space';
+    const siteUrl = Deno.env.get("SITE_) || 'https://miryn.vercel.app';
     
     // Create HTML email
     const html = `
